@@ -69,7 +69,7 @@ This function used as value for `resize-mini-frames' variable."
     (setq mini-frame-completions-frame
           (make-frame `((height . 1)
                         (visibility . nil)
-                        (parent-frame . ,mini-frame-frame)
+                        (parent-frame . ,mini-frame-selected-frame)
                         (delete-before . ,mini-frame-frame)
                         (auto-hide-function . mini-frame--hide-completions)
                         (user-position . t)
@@ -78,19 +78,24 @@ This function used as value for `resize-mini-frames' variable."
                         (minibuffer . nil)
                         (undecorated . t)
                         (internal-border-width . 3)
-                        (drag-internal-border . t)
-                        (left . 0.5)
-                        (width . 1.0))))))
+                        (drag-internal-border . t))))))
 
 (defun mini-frame--display-completions (buffer &rest _args)
   "Display completions BUFFER in another child frame."
   (mini-frame--ensure-completions-frame)
   (modify-frame-parameters
    mini-frame-completions-frame
+   `((parent-frame . ,mini-frame-selected-frame)))
+  (modify-frame-parameters
+   mini-frame-completions-frame
    `(
      (background-color . ,(frame-parameter mini-frame-frame 'background-color))
-     (top . ,(+ 7 (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
-     (height . 0.5)))
+     (top . ,(+ 7
+                (frame-parameter mini-frame-frame 'top)
+                (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
+     (height . 0.25)
+     (width . 0.99)
+     (left . 0.5)))
   (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame))
 
 (defun mini-frame-read-from-minibuffer (fn &rest args)
@@ -116,10 +121,9 @@ This function used as value for `resize-mini-frames' variable."
                             (user-size . t)
                             (internal-border-width . 3)
                             (drag-internal-border . t)))))
-      (mini-frame--ensure-completions-frame)
       (unless (eq selected-frame mini-frame-completions-frame)
         (setq mini-frame-selected-frame selected-frame)
-
+        (mini-frame--ensure-completions-frame)
         (modify-frame-parameters
          mini-frame-frame
          `((parent-frame . ,mini-frame-selected-frame)))
@@ -129,7 +133,9 @@ This function used as value for `resize-mini-frames' variable."
            (top . 0)
            (width . 0.99)
            (background-color . ,(mini-frame-get-background-color))
-           (height . ,(if minibuffer-completion-table 2 1)))))
+           (height . ,(if minibuffer-completion-table 2 1))))
+        (when (frame-visible-p mini-frame-completions-frame)
+          (make-frame-invisible mini-frame-completions-frame)))
       (make-frame-visible mini-frame-frame)
       (select-frame-set-input-focus mini-frame-frame)
       (setq default-directory dd)
