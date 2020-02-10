@@ -102,7 +102,12 @@ This function used as value for `resize-mini-frames' variable."
   "Show minibuffer-only child frame and call FN with ARGS."
   (if (or (minibufferp)
           (eq this-command #'eval-expression))
-      (apply fn args)
+      (progn
+        (when (and (frame-live-p mini-frame-frame)
+                   (frame-visible-p mini-frame-frame)
+                   (not (eq (selected-frame) mini-frame-frame)))
+          (select-frame-set-input-focus mini-frame-frame))
+        (apply fn args))
     (let ((selected-frame (selected-frame))
           (dd default-directory)
           (visible (and (frame-live-p mini-frame-frame)
