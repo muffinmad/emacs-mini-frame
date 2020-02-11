@@ -26,8 +26,18 @@
 ;;; Commentary:
 
 ;; Show minibuffer in child frame on read-from-minibuffer.
+;; This is done by adding advice around `read-from-minibuffer' function.
+;; In advice function child minibuffer-only frame is displayed.
 
 ;;; Code:
+
+(defgroup mini-frame nil
+  "Show minibuffer in child frame."
+  :group 'minibuffer)
+
+(defcustom mini-frame-ignore-commands '(eval-expression)
+  "For this commands minibuffer will not be displayed in child frame."
+  :type '(repeat function))
 
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
@@ -101,7 +111,7 @@ This function used as value for `resize-mini-frames' variable."
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame and call FN with ARGS."
   (if (or (minibufferp)
-          (eq this-command #'eval-expression))
+          (memq this-command mini-frame-ignore-commands))
       (progn
         (when (and (frame-live-p mini-frame-frame)
                    (frame-visible-p mini-frame-frame)
