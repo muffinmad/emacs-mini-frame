@@ -108,6 +108,44 @@ This function used as value for `resize-mini-frames' variable."
      (left . 0.5)))
   (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame))
 
+(defun mini-frame--ensure-frame ()
+  "Create mini-frame."
+  (unless (frame-live-p mini-frame-frame)
+    (setq mini-frame-frame
+          (make-frame '((height . 1)
+                        (left . 0.5)
+                        (visibility . nil)
+                        (minibuffer . only)
+                        (undecorated . t)
+                        (keep-ratio . t)
+                        (user-position . t)
+                        (user-size . t)
+                        (internal-border-width . 3)
+                        (drag-internal-border . t))))))
+
+(defun mini-frame--display ()
+  "Show mini-frame."
+  (let ((selected-frame (selected-frame)))
+    (mini-frame--ensure-frame)
+    (unless (eq selected-frame mini-frame-completions-frame)
+      (setq mini-frame-selected-frame selected-frame)
+      (mini-frame--ensure-completions-frame)
+      (modify-frame-parameters
+       mini-frame-frame
+       `((parent-frame . ,mini-frame-selected-frame)))
+      (modify-frame-parameters
+       mini-frame-frame
+       `((left . 0.5)
+         (top . 0)
+         (width . 0.99)
+         (background-color . ,(mini-frame-get-background-color))
+         (height . ,(if minibuffer-completion-table 2 1))))
+      (when (frame-visible-p mini-frame-completions-frame)
+        (make-frame-invisible mini-frame-completions-frame)))
+    (make-frame-visible mini-frame-frame)
+    (select-frame-set-input-focus mini-frame-frame)
+    (fit-frame-to-buffer mini-frame-frame nil nil nil nil 'vertically)))
+
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame and call FN with ARGS."
   (if (or (minibufferp)
@@ -118,52 +156,24 @@ This function used as value for `resize-mini-frames' variable."
                    (not (eq (selected-frame) mini-frame-frame)))
           (select-frame-set-input-focus mini-frame-frame))
         (apply fn args))
-    (let ((selected-frame (selected-frame))
+    (let (
           (dd default-directory)
           (visible (and (frame-live-p mini-frame-frame)
                         (frame-visible-p mini-frame-frame)))
           (resize-mini-frames #'mini-frame--resize-mini-frame)
           (display-buffer-alist `(("\\*Completions\\*" mini-frame--display-completions))))
-      (unless (frame-live-p mini-frame-frame)
-        (setq mini-frame-frame
-              (make-frame '((height . 1)
-                            (left . 0.5)
-                            (visibility . nil)
-                            (minibuffer . only)
-                            (undecorated . t)
-                            (keep-ratio . t)
-                            (user-position . t)
-                            (user-size . t)
-                            (internal-border-width . 3)
-                            (drag-internal-border . t)))))
-      (unless (eq selected-frame mini-frame-completions-frame)
-        (setq mini-frame-selected-frame selected-frame)
-        (mini-frame--ensure-completions-frame)
-        (modify-frame-parameters
-         mini-frame-frame
-         `((parent-frame . ,mini-frame-selected-frame)))
-        (modify-frame-parameters
-         mini-frame-frame
-         `((left . 0.5)
-           (top . 0)
-           (width . 0.99)
-           (background-color . ,(mini-frame-get-background-color))
-           (height . ,(if minibuffer-completion-table 2 1))))
-        (when (frame-visible-p mini-frame-completions-frame)
-          (make-frame-invisible mini-frame-completions-frame)))
-      (make-frame-visible mini-frame-frame)
-      (select-frame-set-input-focus mini-frame-frame)
+      (mini-frame--display)
       (setq default-directory dd)
       (if visible
           (apply fn args)
         (unwind-protect
             (apply fn args)
           (progn
-          (when (frame-live-p mini-frame-completions-frame)
-            (make-frame-invisible mini-frame-completions-frame))
-          (when (frame-live-p mini-frame-frame)
-            (select-frame-set-input-focus mini-frame-selected-frame)
-            (make-frame-invisible mini-frame-frame))))))))
+            (when (frame-live-p mini-frame-completions-frame)
+              (make-frame-invisible mini-frame-completions-frame))
+            (when (frame-live-p mini-frame-frame)
+              (select-frame-set-input-focus mini-frame-selected-frame)
+              (make-frame-invisible mini-frame-frame))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
