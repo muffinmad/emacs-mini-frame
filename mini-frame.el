@@ -77,11 +77,11 @@ This function used as value for `resize-mini-frames' variable."
   "Display completions BUFFER in another child frame."
   (let ((show-parameters `((parent-frame . ,mini-frame-selected-frame)
                            (background-color . ,(frame-parameter mini-frame-frame 'background-color))
-                           (top . ,(+ 7
+                           (top . ,(+ 6
                                       (frame-parameter mini-frame-frame 'top)
                                       (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
                            (height . 0.25)
-                           (width . 0.99)
+                           (width . 1.0)
                            (left . 0.5))))
     (if (frame-live-p mini-frame-completions-frame)
         (progn
@@ -109,7 +109,7 @@ This function used as value for `resize-mini-frames' variable."
          (parent-frame-parameters `((parent-frame . ,selected-frame)))
          (show-parameters `((left . 0.5)
                             (top . 0)
-                            (width . 0.99)
+                            (width . 1.0)
                             (background-color . ,(mini-frame-get-background-color selected-frame))
                             (height . ,(if minibuffer-completion-table 2 1)))))
     (if (frame-live-p mini-frame-frame)
