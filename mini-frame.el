@@ -73,81 +73,80 @@ This function used as value for `resize-mini-frames' variable."
   (when (and (frame-live-p mini-frame-frame) (frame-visible-p mini-frame-frame))
     (select-frame-set-input-focus mini-frame-frame)))
 
-(defun mini-frame--ensure-completions-frame ()
-  "Create frame to show completions."
-  (unless (frame-live-p mini-frame-completions-frame)
-    (setq mini-frame-completions-frame
-          (make-frame `((height . 1)
-                        (visibility . nil)
-                        (auto-hide-function . mini-frame--hide-completions)
-                        (user-position . t)
-                        (user-size . t)
-                        (keep-ratio . t)
-                        (minibuffer . nil)
-                        (undecorated . t)
-                        (internal-border-width . 3)
-                        (drag-internal-border . t))))))
-
 (defun mini-frame--display-completions (buffer &rest _args)
   "Display completions BUFFER in another child frame."
-  (mini-frame--ensure-completions-frame)
-  (modify-frame-parameters
-   mini-frame-completions-frame
-   `((parent-frame . ,mini-frame-selected-frame)))
-  (modify-frame-parameters
-   mini-frame-completions-frame
-   `(
-     (background-color . ,(frame-parameter mini-frame-frame 'background-color))
-     (top . ,(+ 7
-                (frame-parameter mini-frame-frame 'top)
-                (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
-     (height . 0.25)
-     (width . 0.99)
-     (left . 0.5)))
-  (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame))
+  (let ((show-parameters `((parent-frame . ,mini-frame-selected-frame)
+                           (background-color . ,(frame-parameter mini-frame-frame 'background-color))
+                           (top . ,(+ 7
+                                      (frame-parameter mini-frame-frame 'top)
+                                      (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
+                           (height . 0.25)
+                           (width . 0.99)
+                           (left . 0.5))))
+    (if (frame-live-p mini-frame-completions-frame)
+        (progn
+          (modify-frame-parameters
+           mini-frame-completions-frame
+           `((parent-frame . ,mini-frame-selected-frame)))
+          (modify-frame-parameters mini-frame-completions-frame show-parameters))
+      (setq mini-frame-completions-frame
+            (make-frame (append '((visibility . nil)
+                                  (auto-hide-function . mini-frame--hide-completions)
+                                  (user-position . t)
+                                  (user-size . t)
+                                  (keep-ratio . t)
+                                  (minibuffer . nil)
+                                  (undecorated . t)
+                                  (internal-border-width . 3)
+                                  (drag-internal-border . t))
+                                show-parameters))))
+    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame)))
 
-(defun mini-frame--ensure-frame ()
-  "Create mini-frame."
-  (unless (frame-live-p mini-frame-frame)
-    (setq mini-frame-frame
-          (make-frame '((height . 1)
-                        (left . 0.5)
-                        (visibility . nil)
-                        (minibuffer . only)
-                        (undecorated . t)
-                        (keep-ratio . t)
-                        (user-position . t)
-                        (user-size . t)
-                        (internal-border-width . 3)
-                        (drag-internal-border . t))))))
-
-(defun mini-frame--display ()
-  "Show mini-frame."
-  (let ((selected-frame (selected-frame)))
-    (mini-frame--ensure-frame)
-    (unless (frame-parameter selected-frame 'parent-frame)
-      (setq mini-frame-selected-frame selected-frame)
-      (modify-frame-parameters
-       mini-frame-frame
-       `((parent-frame . ,mini-frame-selected-frame)))
-      (modify-frame-parameters
-       mini-frame-frame
-       `((left . 0.5)
-         (top . 0)
-         (width . 0.99)
-         (background-color . ,(mini-frame-get-background-color))
-         (height . ,(if minibuffer-completion-table 2 1))))
-      (when (and (frame-live-p mini-frame-completions-frame) (frame-visible-p mini-frame-completions-frame))
-        (make-frame-invisible mini-frame-completions-frame)))
+(defun mini-frame--display (fn args)
+  "Show mini-frame and call FN with ARGS."
+  (let* ((selected-frame (selected-frame))
+         (dd default-directory)
+         (parent-frame-parameters `((parent-frame . ,selected-frame)))
+         (show-parameters `((left . 0.5)
+                            (top . 0)
+                            (width . 0.99)
+                            (background-color . ,(mini-frame-get-background-color selected-frame))
+                            (height . ,(if minibuffer-completion-table 2 1)))))
+    (if (frame-live-p mini-frame-frame)
+        (unless (memq selected-frame (list mini-frame-frame mini-frame-completions-frame))
+          (setq mini-frame-selected-frame selected-frame)
+          (modify-frame-parameters mini-frame-frame parent-frame-parameters)
+          (modify-frame-parameters mini-frame-frame show-parameters))
+      (progn
+        (setq mini-frame-selected-frame selected-frame)
+        (setq mini-frame-frame
+              (make-frame (append '((height . 1)
+                                    (left . 0.5)
+                                    (visibility . nil)
+                                    (minibuffer . only)
+                                    (undecorated . t)
+                                    (keep-ratio . t)
+                                    (user-position . t)
+                                    (user-size . t)
+                                    (internal-border-width . 3)
+                                    (drag-internal-border . t))
+                                  parent-frame-parameters
+                                  show-parameters)))))
+    (when (and (frame-live-p mini-frame-completions-frame)
+               (frame-visible-p mini-frame-completions-frame))
+      (make-frame-invisible mini-frame-completions-frame))
     (make-frame-visible mini-frame-frame)
     (select-frame-set-input-focus mini-frame-frame)
-    (fit-frame-to-buffer mini-frame-frame nil nil nil nil 'vertically)))
+    (setq default-directory dd)
+    (fit-frame-to-buffer mini-frame-frame nil nil nil nil 'vertically)
+    (apply fn args)))
 
 (defun mini-frame--delete-frame (frame)
   "Called before delete FRAME."
   (cond
    ((eq frame mini-frame-completions-frame)
-    (when (and (frame-live-p mini-frame-frame) (frame-visible-p mini-frame-frame))
+    (when (and (frame-live-p mini-frame-frame)
+               (frame-visible-p mini-frame-frame))
       (select-frame-set-input-focus mini-frame-frame)))
    ((eq frame mini-frame-frame)
     (when (frame-live-p mini-frame-completions-frame)
@@ -155,35 +154,30 @@ This function used as value for `resize-mini-frames' variable."
     (select-frame-set-input-focus mini-frame-selected-frame))))
 
 (defun mini-frame-read-from-minibuffer (fn &rest args)
-  "Show minibuffer-only child frame and call FN with ARGS."
-  (if (or (minibufferp)
-          (memq this-command mini-frame-ignore-commands))
-      (progn
-        (when (and (frame-live-p mini-frame-frame)
-                   (frame-visible-p mini-frame-frame)
-                   (not (eq (selected-frame) mini-frame-frame)))
-          (select-frame-set-input-focus mini-frame-frame))
-        (apply fn args))
+  "Show minibuffer-only child frame (if needed) and call FN with ARGS."
+  (cond
+   ((and (frame-live-p mini-frame-frame)
+         (frame-visible-p mini-frame-frame))
+    (mini-frame--display fn args))
+   ((or (minibufferp)
+        (memq this-command mini-frame-ignore-commands))
+    (apply fn args))
+   (t
     (let ((after-make-frame-functions nil)
-          (dd default-directory)
-          (visible (and (frame-live-p mini-frame-frame)
-                        (frame-visible-p mini-frame-frame)))
           (resize-mini-frames #'mini-frame--resize-mini-frame)
-          (display-buffer-alist `(("\\*Completions\\*" mini-frame--display-completions)))
-          (delete-frame-functions (cons #'mini-frame--delete-frame
-                                        delete-frame-functions)))
-      (mini-frame--display)
-      (setq default-directory dd)
-      (if visible
-          (apply fn args)
-        (unwind-protect
-            (apply fn args)
-          (progn
-            (when (frame-live-p mini-frame-completions-frame)
-              (make-frame-invisible mini-frame-completions-frame))
-            (when (frame-live-p mini-frame-frame)
-              (select-frame-set-input-focus mini-frame-selected-frame)
-              (make-frame-invisible mini-frame-frame))))))))
+          (display-buffer-alist
+           `(("\\*Completions\\*" mini-frame--display-completions)))
+          (delete-frame-functions
+           (cons #'mini-frame--delete-frame delete-frame-functions)))
+      (unwind-protect
+          (mini-frame--display fn args)
+        (progn
+          (when (frame-live-p mini-frame-completions-frame)
+            (make-frame-invisible mini-frame-completions-frame))
+          (when (frame-live-p mini-frame-selected-frame)
+            (select-frame-set-input-focus mini-frame-selected-frame))
+          (when (frame-live-p mini-frame-frame)
+            (make-frame-invisible mini-frame-frame))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
