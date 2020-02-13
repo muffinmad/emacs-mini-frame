@@ -79,8 +79,6 @@ This function used as value for `resize-mini-frames' variable."
     (setq mini-frame-completions-frame
           (make-frame `((height . 1)
                         (visibility . nil)
-                        (parent-frame . ,mini-frame-selected-frame)
-                        (delete-before . ,mini-frame-frame)
                         (auto-hide-function . mini-frame--hide-completions)
                         (user-position . t)
                         (user-size . t)
@@ -127,9 +125,8 @@ This function used as value for `resize-mini-frames' variable."
   "Show mini-frame."
   (let ((selected-frame (selected-frame)))
     (mini-frame--ensure-frame)
-    (unless (eq selected-frame mini-frame-completions-frame)
+    (unless (frame-parameter selected-frame 'parent-frame)
       (setq mini-frame-selected-frame selected-frame)
-      (mini-frame--ensure-completions-frame)
       (modify-frame-parameters
        mini-frame-frame
        `((parent-frame . ,mini-frame-selected-frame)))
@@ -140,11 +137,22 @@ This function used as value for `resize-mini-frames' variable."
          (width . 0.99)
          (background-color . ,(mini-frame-get-background-color))
          (height . ,(if minibuffer-completion-table 2 1))))
-      (when (frame-visible-p mini-frame-completions-frame)
+      (when (and (frame-live-p mini-frame-completions-frame) (frame-visible-p mini-frame-completions-frame))
         (make-frame-invisible mini-frame-completions-frame)))
     (make-frame-visible mini-frame-frame)
     (select-frame-set-input-focus mini-frame-frame)
     (fit-frame-to-buffer mini-frame-frame nil nil nil nil 'vertically)))
+
+(defun mini-frame--delete-frame (frame)
+  "Called before delete FRAME."
+  (cond
+   ((eq frame mini-frame-completions-frame)
+    (when (and (frame-live-p mini-frame-frame) (frame-visible-p mini-frame-frame))
+      (select-frame-set-input-focus mini-frame-frame)))
+   ((eq frame mini-frame-frame)
+    (when (frame-live-p mini-frame-completions-frame)
+      (make-frame-invisible mini-frame-completions-frame))
+    (select-frame-set-input-focus mini-frame-selected-frame))))
 
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame and call FN with ARGS."
@@ -156,12 +164,14 @@ This function used as value for `resize-mini-frames' variable."
                    (not (eq (selected-frame) mini-frame-frame)))
           (select-frame-set-input-focus mini-frame-frame))
         (apply fn args))
-    (let (
+    (let ((after-make-frame-functions nil)
           (dd default-directory)
           (visible (and (frame-live-p mini-frame-frame)
                         (frame-visible-p mini-frame-frame)))
           (resize-mini-frames #'mini-frame--resize-mini-frame)
-          (display-buffer-alist `(("\\*Completions\\*" mini-frame--display-completions))))
+          (display-buffer-alist `(("\\*Completions\\*" mini-frame--display-completions)))
+          (delete-frame-functions (cons #'mini-frame--delete-frame
+                                        delete-frame-functions)))
       (mini-frame--display)
       (setq default-directory dd)
       (if visible
