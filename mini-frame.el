@@ -75,8 +75,8 @@ This function used as value for `resize-mini-frames' variable."
 
 (defun mini-frame--display-completions (buffer &rest _args)
   "Display completions BUFFER in another child frame."
-  (let ((show-parameters `((parent-frame . ,mini-frame-selected-frame)
-                           (background-color . ,(frame-parameter mini-frame-frame 'background-color))
+  (let ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
+        (show-parameters `((background-color . ,(frame-parameter mini-frame-frame 'background-color))
                            (top . ,(+ 6
                                       (frame-parameter mini-frame-frame 'top)
                                       (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
@@ -85,9 +85,7 @@ This function used as value for `resize-mini-frames' variable."
                            (left . 0.5))))
     (if (frame-live-p mini-frame-completions-frame)
         (progn
-          (modify-frame-parameters
-           mini-frame-completions-frame
-           `((parent-frame . ,mini-frame-selected-frame)))
+          (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
           (modify-frame-parameters mini-frame-completions-frame show-parameters))
       (setq mini-frame-completions-frame
             (make-frame (append '((visibility . nil)
@@ -99,6 +97,7 @@ This function used as value for `resize-mini-frames' variable."
                                   (undecorated . t)
                                   (internal-border-width . 3)
                                   (drag-internal-border . t))
+                                parent-frame-parameters
                                 show-parameters))))
     (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame)))
 
