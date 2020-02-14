@@ -177,7 +177,10 @@ This function used as value for `resize-mini-frames' variable."
           (when (frame-live-p mini-frame-selected-frame)
             (select-frame-set-input-focus mini-frame-selected-frame))
           (when (frame-live-p mini-frame-frame)
-            (make-frame-invisible mini-frame-frame))))))))
+            (if (eq system-type 'windows-nt)
+                ;; FIXME sometime buffer is not visible on windows
+                (delete-frame mini-frame-frame)
+              (make-frame-invisible mini-frame-frame)))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
