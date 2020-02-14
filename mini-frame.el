@@ -139,7 +139,6 @@ This function used as value for `resize-mini-frames' variable."
     (make-frame-visible mini-frame-frame)
     (select-frame-set-input-focus mini-frame-frame)
     (setq default-directory dd)
-    (fit-frame-to-buffer mini-frame-frame nil nil nil nil 'vertically)
     (apply fn args)))
 
 (defun mini-frame--delete-frame (frame)
