@@ -39,6 +39,10 @@
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat function))
 
+(defcustom mini-frame-handle-completions t
+  "Create child frame to display completions buffer."
+  :type 'boolean)
+
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
 (defvar mini-frame-completions-frame nil)
@@ -166,7 +170,9 @@ This function used as value for `resize-mini-frames' variable."
     (let ((after-make-frame-functions nil)
           (resize-mini-frames #'mini-frame--resize-mini-frame)
           (display-buffer-alist
-           `(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions)))
+           (if mini-frame-handle-completions
+               `(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions))
+             display-buffer-alist))
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions)))
       (unwind-protect
