@@ -25,7 +25,7 @@
 
 ;;; Commentary:
 
-;; Show minibuffer in child frame on read-from-minibuffer.
+;; Show minibuffer in child frame on `read-from-minibuffer'.
 ;; This is done by adding advice around `read-from-minibuffer' function.
 ;; In advice function child minibuffer-only frame is displayed.
 
