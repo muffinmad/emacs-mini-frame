@@ -43,6 +43,13 @@
   "Create child frame to display completions buffer."
   :type 'boolean)
 
+(defcustom mini-frame-resize t
+  "Resize mini frame.
+If non-nil, set `resize-mini-frames' option to `mini-frame--resize-mini-frame'
+which will fit frame to buffer vertically only.
+Option `resize-mini-frames' is available on Emacs 27 and later."
+  :type 'boolean)
+
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
 (defvar mini-frame-completions-frame nil)
@@ -168,7 +175,8 @@ This function used as value for `resize-mini-frames' variable."
     (mini-frame--display fn args))
    (t
     (let ((after-make-frame-functions nil)
-          (resize-mini-frames #'mini-frame--resize-mini-frame)
+          (resize-mini-frames (when mini-frame-resize
+                                #'mini-frame--resize-mini-frame))
           (display-buffer-alist
            (if mini-frame-handle-completions
                `(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions))
