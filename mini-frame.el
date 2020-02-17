@@ -46,7 +46,7 @@
   "Frame parameters wich will be applied to mini frame on show.
 Unless background color is specified it will be set to result of
 `mini-frame-background-color-function'."
-  :type 'alist)
+  :type '(choice alist function))
 
 (defcustom mini-frame-color-shift-step 27
   "Shift each of RGB channels of background color by this value.
@@ -139,9 +139,12 @@ This function used as value for `resize-mini-frames' variable."
                                              mini-frame-completions-frame)))
          (dd default-directory)
          (parent-frame-parameters `((parent-frame . ,selected-frame)))
-         (show-parameters (append mini-frame-show-parameters
-                                  (unless (alist-get 'background-color mini-frame-show-parameters)
-                                    `((background-color . ,(funcall mini-frame-background-color-function)))))))
+         (show-parameters (if (functionp mini-frame-show-parameters)
+                              (funcall mini-frame-show-parameters)
+                            mini-frame-show-parameters))
+         (show-parameters (append (unless (alist-get 'background-color show-parameters)
+                                    `((background-color . ,(funcall mini-frame-background-color-function))))
+                                  show-parameters)))
     (if (frame-live-p mini-frame-frame)
         (unless selected-is-mini-frame
           (setq mini-frame-selected-frame selected-frame)
