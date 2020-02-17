@@ -63,6 +63,19 @@ Called if `mini-frame-show-paremeters' doesn't specify background color."
   "Create child frame to display completions buffer."
   :type 'boolean)
 
+(defcustom mini-frame-completions-show-parameters '((height . 0.25)
+                                                    (width . 1.0)
+                                                    (left . 0.5))
+  "Frame parameters wich will be applied to completions frame on show.
+Unless background-color is specified it will be set to background color
+of mini frame.
+Unless top is specified it will be set to result of `mini-frame-completions-top-function'."
+  :type '(choice alist function))
+
+(defcustom mini-frame-completions-top-function #'mini-frame-get-completions-top
+  "Function to calculate top parameter of completions frame."
+  :type 'function)
+
 (defcustom mini-frame-resize t
   "Resize mini frame.
 If non-nil, set `resize-mini-frames' option to `mini-frame--resize-mini-frame'
@@ -104,16 +117,23 @@ This function used as value for `resize-mini-frames' variable."
   (when (and (frame-live-p mini-frame-frame) (frame-visible-p mini-frame-frame))
     (select-frame-set-input-focus mini-frame-frame)))
 
+(defun mini-frame-get-completions-top ()
+  "Calculate top of completions frame to be just below mini frame."
+  (+ (* 2 (frame-parameter mini-frame-frame 'internal-border-width))
+     (frame-parameter mini-frame-frame 'top)
+     (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
+
 (defun mini-frame--display-completions (buffer &rest _args)
   "Display completions BUFFER in another child frame."
-  (let ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
-        (show-parameters `((background-color . ,(frame-parameter mini-frame-frame 'background-color))
-                           (top . ,(+ (* 2 (frame-parameter mini-frame-frame 'internal-border-width))
-                                      (frame-parameter mini-frame-frame 'top)
-                                      (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
-                           (height . 0.25)
-                           (width . 1.0)
-                           (left . 0.5))))
+  (let* ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
+         (show-parameters (if (functionp mini-frame-completions-show-parameters)
+                              (funcall mini-frame-completions-show-parameters)
+                            mini-frame-completions-show-parameters))
+         (show-parameters (append (unless (alist-get 'background-color show-parameters)
+                                    `((background-color . ,(frame-parameter mini-frame-frame 'background-color))))
+                                  (unless (alist-get 'top show-parameters)
+                                    `((top . ,(funcall mini-frame-completions-top-function))))
+                                  show-parameters)))
     (if (frame-live-p mini-frame-completions-frame)
         (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
       (setq mini-frame-completions-frame
@@ -152,8 +172,7 @@ This function used as value for `resize-mini-frames' variable."
       (progn
         (setq mini-frame-selected-frame selected-frame)
         (setq mini-frame-frame
-              (make-frame (append '((height . 1)
-                                    (visibility . nil)
+              (make-frame (append '((visibility . nil)
                                     (minibuffer . only)
                                     (undecorated . t)
                                     (keep-ratio . t)
