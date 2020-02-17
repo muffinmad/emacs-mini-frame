@@ -39,11 +39,25 @@
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat function))
 
+(defcustom mini-frame-show-parameters '((left . 0.5)
+                                        (top . 0)
+                                        (width . 1.0)
+                                        (height . 1))
+  "Frame parameters wich will be applied to mini frame on show.
+Unless background color is specified it will be set to result of
+`mini-frame-background-color-function'."
+  :type 'alist)
+
 (defcustom mini-frame-color-shift-step 27
   "Shift each of RGB channels of background color by this value.
 Background color is \"moved\" towards foreground color of selected frame
 to determine background color of mini frame."
   :type 'integer)
+
+(defcustom mini-frame-background-color-function #'mini-frame-get-background-color
+  "Function to calculate background color of mini frame.
+Called if `mini-frame-show-paremeters' doesn't specify background color."
+  :type 'function)
 
 (defcustom mini-frame-handle-completions t
   "Create child frame to display completions buffer."
@@ -61,7 +75,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defvar mini-frame-completions-frame nil)
 
 (defun mini-frame--shift-color (from to &optional by)
-  "Move color FROM towards TO by BY."
+  "Move color FROM towards TO by BY.  If BY is ommited, `mini-frame-color-shift-step' is used."
   (let ((f (ash from -8))
         (by (or by mini-frame-color-shift-step)))
     (cond
@@ -125,11 +139,9 @@ This function used as value for `resize-mini-frames' variable."
                                              mini-frame-completions-frame)))
          (dd default-directory)
          (parent-frame-parameters `((parent-frame . ,selected-frame)))
-         (show-parameters `((left . 0.5)
-                            (top . 0)
-                            (width . 1.0)
-                            (background-color . ,(mini-frame-get-background-color selected-frame))
-                            (height . 1))))
+         (show-parameters (append mini-frame-show-parameters
+                                  (unless (alist-get 'background-color mini-frame-show-parameters)
+                                    `((background-color . ,(funcall mini-frame-background-color-function)))))))
     (if (frame-live-p mini-frame-frame)
         (unless selected-is-mini-frame
           (setq mini-frame-selected-frame selected-frame)
@@ -138,7 +150,6 @@ This function used as value for `resize-mini-frames' variable."
         (setq mini-frame-selected-frame selected-frame)
         (setq mini-frame-frame
               (make-frame (append '((height . 1)
-                                    (left . 0.5)
                                     (visibility . nil)
                                     (minibuffer . only)
                                     (undecorated . t)
@@ -185,7 +196,9 @@ This function used as value for `resize-mini-frames' variable."
                                 #'mini-frame--resize-mini-frame))
           (display-buffer-alist
            (if mini-frame-handle-completions
-               `(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions))
+               (append
+                '(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions))
+                display-buffer-alist)
              display-buffer-alist))
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions)))
