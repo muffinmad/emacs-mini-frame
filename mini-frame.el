@@ -39,6 +39,12 @@
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat function))
 
+(defcustom mini-frame-color-shift-step 27
+  "Shift each of RGB channels of background color by this value.
+Background color is \"moved\" towards foreground color of selected frame
+to determine background color of mini frame."
+  :type 'integer)
+
 (defcustom mini-frame-handle-completions t
   "Create child frame to display completions buffer."
   :type 'boolean)
@@ -57,7 +63,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defun mini-frame--shift-color (from to &optional by)
   "Move color FROM towards TO by BY."
   (let ((f (ash from -8))
-        (by (or by 27)))
+        (by (or by mini-frame-color-shift-step)))
     (cond
      ((> from to) (- f by))
      ((< from to) (+ f by))
@@ -88,7 +94,7 @@ This function used as value for `resize-mini-frames' variable."
   "Display completions BUFFER in another child frame."
   (let ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
         (show-parameters `((background-color . ,(frame-parameter mini-frame-frame 'background-color))
-                           (top . ,(+ 6
+                           (top . ,(+ (* 2 (frame-parameter mini-frame-frame 'internal-border-width))
                                       (frame-parameter mini-frame-frame 'top)
                                       (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
                            (height . 0.25)
