@@ -223,7 +223,10 @@ This function used as value for `resize-mini-frames' variable."
                 display-buffer-alist)
              display-buffer-alist))
           (delete-frame-functions
-           (cons #'mini-frame--delete-frame delete-frame-functions)))
+           (cons #'mini-frame--delete-frame delete-frame-functions))
+          ;; FIXME which-key is not working in mini frame
+          (which-key-popup-type 'frame))
+      (ignore which-key-popup-type)
       (unwind-protect
           (mini-frame--display fn args)
         (progn
