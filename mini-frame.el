@@ -3,7 +3,7 @@
 ;; Copyright (C) 2020 Andrii Kolomoiets
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
-;; Keywords: minibuffer
+;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
 ;; Package-Version: 1.0
 ;; Package-Requires: ((emacs "26.1"))
