@@ -6,5 +6,3 @@ Show minibuffer in child frame on `read-from-minibuffer`
 ## `icomplete-mode` and `M-x`
 
 ![icomplete-m-x](./screenshots/icomplete-m-x.png)
-
-![icomplete-m-x](./screenshots/full-size.png)
