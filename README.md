@@ -1,3 +1,5 @@
+[![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/copyleft/gpl.html)
+
 # emacs-mini-frame
 
 Place minibuffer at the top of the current frame on `read-from-minibuffer`.
