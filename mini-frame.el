@@ -259,6 +259,7 @@ This function used as value for `resize-mini-frames' variable."
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
           (which-key-popup-type 'frame))
+      (ignore resize-mini-frames)
       (ignore which-key-popup-type)
       (unwind-protect
           (mini-frame--display fn args)
