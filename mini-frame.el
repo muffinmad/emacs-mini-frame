@@ -263,16 +263,15 @@ This function used as value for `resize-mini-frames' variable."
       (ignore which-key-popup-type)
       (unwind-protect
           (mini-frame--display fn args)
-        (progn
-          (when (frame-live-p mini-frame-completions-frame)
-            (make-frame-invisible mini-frame-completions-frame))
-          (when (frame-live-p mini-frame-selected-frame)
-            (select-frame-set-input-focus mini-frame-selected-frame))
-          (when (frame-live-p mini-frame-frame)
-            (if (eq system-type 'windows-nt)
-                ;; FIXME sometime buffer is not visible on windows
-                (delete-frame mini-frame-frame)
-              (make-frame-invisible mini-frame-frame)))))))))
+        (when (frame-live-p mini-frame-completions-frame)
+          (make-frame-invisible mini-frame-completions-frame))
+        (when (frame-live-p mini-frame-selected-frame)
+          (select-frame-set-input-focus mini-frame-selected-frame))
+        (when (frame-live-p mini-frame-frame)
+          (if (eq system-type 'windows-nt)
+              ;; FIXME sometime buffer is not visible on windows
+              (delete-frame mini-frame-frame)
+            (make-frame-invisible mini-frame-frame))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
