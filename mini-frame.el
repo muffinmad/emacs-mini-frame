@@ -180,7 +180,8 @@ This function used as value for `resize-mini-frames' variable."
                                   (internal-border-width . 3)
                                   (drag-internal-border . t))
                                 parent-frame-parameters
-                                show-parameters))))
+                                show-parameters)))
+      (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame)))
 
@@ -214,7 +215,8 @@ This function used as value for `resize-mini-frames' variable."
                                     (internal-border-width . 3)
                                     (drag-internal-border . t))
                                   parent-frame-parameters
-                                  show-parameters)))))
+                                  show-parameters)))
+        (set-face-background 'fringe nil mini-frame-frame)))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
