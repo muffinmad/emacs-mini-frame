@@ -254,7 +254,7 @@ This function used as value for `resize-mini-frames' variable."
           (display-buffer-alist
            (if mini-frame-handle-completions
                (append
-                '(("\\*\\(Ido \\)?Completions\\*" mini-frame--display-completions))
+                '(("\\(\\*\\(Ido \\)?Completions\\)\\|\\(\\*Isearch completions\\)\\*" mini-frame--display-completions))
                 display-buffer-alist)
              display-buffer-alist))
           (delete-frame-functions
