@@ -116,6 +116,12 @@ which will fit frame to buffer vertically only.
 Option `resize-mini-frames' is available on Emacs 27 and later."
   :type 'boolean)
 
+(defcustom mini-frame-max-height nil
+  " Set max frame height.
+when non-nil and `mini-frame-resize' is non-nil ."
+  :type 'boolean)
+
+
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
 (defvar mini-frame-completions-frame nil)
@@ -142,7 +148,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (fit-frame-to-buffer frame nil nil nil nil 'vertically))
+  (fit-frame-to-buffer frame mini-frame-max-height nil nil nil 'vertically))
 
 (defun mini-frame--hide-completions (&optional frame _force)
   "Hide completions FRAME."
