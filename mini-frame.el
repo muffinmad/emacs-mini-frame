@@ -105,6 +105,13 @@ of mini frame.
 Unless top is specified it will be set to result of `mini-frame-completions-top-function'."
   :type '(choice alist function))
 
+(defcustom mini-frame-completions-focus nil
+  "Which frame will receive focus once completions frame is shown.
+If nil, leave focus as is."
+  :type '(choice (const :tag "Do nothing" nil)
+                 (const :tag "Select completions frame" completions)
+                 (const :tag "Select minibuffer frame" minibuffer)))
+
 (defcustom mini-frame-completions-top-function #'mini-frame-get-completions-top
   "Function to calculate top parameter of completions frame."
   :type 'function)
@@ -160,6 +167,15 @@ This function used as value for `resize-mini-frames' variable."
   (+ (* 2 (frame-parameter mini-frame-frame 'internal-border-width))
      (frame-parameter mini-frame-frame 'top)
      (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
+
+(defun mini-frame--completions-setup ()
+  "Completion setup hook."
+  (when mini-frame-completions-focus
+    (let ((frame (if (eq mini-frame-completions-focus 'completions)
+                     mini-frame-completions-frame
+                   mini-frame-frame)))
+      (when (and (frame-live-p frame) (frame-visible-p frame))
+        (select-frame-set-input-focus frame)))))
 
 (defun mini-frame--display-completions (buffer &rest _args)
   "Display completions BUFFER in another child frame."
@@ -262,6 +278,8 @@ This function used as value for `resize-mini-frames' variable."
                 '(("\\(\\*\\(Ido \\)?Completions\\)\\|\\(\\*Isearch completions\\)\\*" mini-frame--display-completions))
                 display-buffer-alist)
              display-buffer-alist))
+          (completion-setup-hook
+           (cons #'mini-frame--completions-setup completion-setup-hook))
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
