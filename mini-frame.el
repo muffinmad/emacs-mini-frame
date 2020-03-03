@@ -313,9 +313,11 @@ This function used as value for `resize-mini-frames' variable."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer))
+    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
+    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
+    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
     (when (frame-live-p mini-frame-completions-frame)
