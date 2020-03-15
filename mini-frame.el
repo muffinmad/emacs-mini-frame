@@ -76,7 +76,7 @@
                                         (top . 0)
                                         (width . 1.0)
                                         (height . 1))
-  "Frame parameters wich will be applied to mini frame on show.
+  "Frame parameters which will be applied to mini frame on show.
 Unless background color is specified it will be set to result of
 `mini-frame-background-color-function'."
   :type '(choice alist function))
@@ -89,7 +89,7 @@ to determine background color of mini frame."
 
 (defcustom mini-frame-background-color-function #'mini-frame-get-background-color
   "Function to calculate background color of mini frame.
-Called if `mini-frame-show-paremeters' doesn't specify background color."
+Called if `mini-frame-show-parameters' doesn't specify background color."
   :type 'function)
 
 (defcustom mini-frame-handle-completions t
@@ -99,7 +99,7 @@ Called if `mini-frame-show-paremeters' doesn't specify background color."
 (defcustom mini-frame-completions-show-parameters '((height . 0.25)
                                                     (width . 1.0)
                                                     (left . 0.5))
-  "Frame parameters wich will be applied to completions frame on show.
+  "Frame parameters which will be applied to completions frame on show.
 Unless background-color is specified it will be set to background color
 of mini frame.
 Unless top is specified it will be set to result of `mini-frame-completions-top-function'."
@@ -133,7 +133,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defvar mini-frame-completions-frame nil)
 
 (defun mini-frame--shift-color (from to &optional by)
-  "Move color FROM towards TO by BY.  If BY is ommited, `mini-frame-color-shift-step' is used."
+  "Move color FROM towards TO by BY.  If BY is omitted, `mini-frame-color-shift-step' is used."
   (let ((f (ash from -8))
         (by (or by mini-frame-color-shift-step)))
     (cond
