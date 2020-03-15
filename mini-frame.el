@@ -105,7 +105,7 @@ of mini frame.
 Unless top is specified it will be set to result of `mini-frame-completions-top-function'."
   :type '(choice alist function))
 
-(defcustom mini-frame-completions-focus nil
+(defcustom mini-frame-completions-focus 'minibuffer
   "Which frame will receive focus once completions frame is shown.
 If nil, leave focus as is."
   :type '(choice (const :tag "Do nothing" nil)
