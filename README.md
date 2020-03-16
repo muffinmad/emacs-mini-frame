@@ -1,5 +1,5 @@
 [![License GPL 3](https://img.shields.io/badge/license-GPL_3-green.svg)](http://www.gnu.org/copyleft/gpl.html)
-
+[![MELPA](http://melpa.org/packages/mini-frame-badge.svg)](http://melpa.org/#/mini-frame)
 # emacs-mini-frame
 
 Place minibuffer at the top of the current frame on `read-from-minibuffer`.
@@ -57,7 +57,9 @@ One can configure the list of commands that must not be shown in the child frame
 
 ## Installation and usage
 
-Download `mini-frame.el` and run:
+`mini-frame` is available on [MELPA](https://melpa.org/#/mini-frame).
+
+Alternatively, you can download `mini-frame.el` and run:
 
 <kbd>M-x</kbd> `package-install-file` <kbd>RET</kbd> `<path-to-mini-frame-el>` <kbd>RET</kbd>
 
