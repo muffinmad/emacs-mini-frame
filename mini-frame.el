@@ -186,8 +186,9 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
-(defun mini-frame--display-completions (buffer &rest _args)
-  "Display completions BUFFER in another child frame."
+(defun mini-frame--display-completions (buffer alist)
+  "Display completions BUFFER in another child frame.
+ALIST is passed to `window--display-buffer'."
   (let* ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
          (show-parameters (if (functionp mini-frame-completions-show-parameters)
                               (funcall mini-frame-completions-show-parameters)
@@ -213,7 +214,7 @@ This function used as value for `resize-mini-frames' variable."
                                 show-parameters)))
       (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
-    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame)))
+    (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame alist)))
 
 (defun mini-frame--display (fn args)
   "Show mini-frame and call FN with ARGS."
