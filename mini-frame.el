@@ -290,6 +290,8 @@ ALIST is passed to `window--display-buffer'."
              display-buffer-alist))
           (completion-setup-hook
            (cons #'mini-frame--completions-setup completion-setup-hook))
+          (temp-buffer-window-show-hook
+           (cons #'mini-frame--completions-setup temp-buffer-window-show-hook))
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
