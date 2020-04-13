@@ -64,13 +64,16 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defgroup mini-frame nil
   "Show minibuffer in child frame."
   :group 'minibuffer)
 
 (defcustom mini-frame-ignore-commands '(eval-expression)
   "For this commands minibuffer will not be displayed in child frame."
-  :type '(repeat function))
+  :type '(repeat (choice function
+                         (string :tag "String or regex"))))
 
 (defcustom mini-frame-show-parameters '((left . 0.5)
                                         (top . 0)
@@ -273,7 +276,12 @@ ALIST is passed to `window--display-buffer'."
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
    ((or (minibufferp)
-        (memq this-command mini-frame-ignore-commands))
+        (let ((this-command-string (symbol-name this-command)))
+          (cl-loop for ignored-command in mini-frame-ignore-commands do
+                   (when (or (eq this-command ignored-command)
+                             (and (stringp ignored-command)
+                                  (string-match-p ignored-command this-command-string)))
+                     (cl-return t)))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
          (frame-visible-p mini-frame-frame))
