@@ -278,7 +278,7 @@ ALIST is passed to `window--display-buffer'."
             (when (if (stringp ignored-command)
                       (string-match-p ignored-command (symbol-name this-command))
                     (eq ignored-command this-command))
-              (throw 'ignored t)))))        
+              (throw 'ignored t)))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
          (frame-visible-p mini-frame-frame))
