@@ -68,7 +68,7 @@
   "Show minibuffer in child frame."
   :group 'minibuffer)
 
-(defcustom mini-frame-ignore-commands '(eval-expression edebug-eval-expression debugger-eval-expression)
+(defcustom mini-frame-ignore-commands '(eval-expression "edebug-eval-expression" debugger-eval-expression)
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat (choice function regexp)))
 
