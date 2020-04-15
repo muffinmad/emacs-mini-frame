@@ -12,7 +12,9 @@ While it's fine for me to have eldoc, flymake and other messages to appear at th
 
 By default mini-frame is placed at the top of the current frame and occupied full width. Here is `execute-extended-command` (<kbd>M-x</kbd>) with `icomplete-mode` enabled:
 
-![icomplete-m-x](./screenshots/icomplete-m-x.png)
+<p align="center">
+  <img scr="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/icomplete-m-x.png" width="640">
+</p>
 
 Those who use vertical completion candidates list may configure mini-frame not to occupy full width:
 
@@ -26,15 +28,21 @@ Those who use vertical completion candidates list may configure mini-frame not t
 
 Here is `switch-to-buffer` (<kbd>C-x b</kbd>) with `ido-vertical-mode`:
 
-![ido-vertical-buffers](./screenshots/ido-vertical-buffers.png)
+<p align="center">
+  <img scr="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/ido-vertical-buffers.png" width="640">
+</p>
 
 And `execute-extended-command` (<kbd>M-x</kbd>) with `ivy-mode`:
 
-![ivy-m-x](./screenshots/ivy-m-x.png)
+<p align="center">
+  <img scr="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/ivy-m-x.png" width="640">
+</p>
 
 `mini-frame-mode` also create separate child frame to display completions list:
 
-![completions-frame](./screenshots/completions-frame.png)
+<p align="center">
+  <img scr="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/completions-frame.png" width="640">
+</p>
 
 ## Mini-frame size
 
