@@ -214,6 +214,7 @@ ALIST is passed to `window--display-buffer'."
                                 show-parameters)))
       (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
+    (make-frame-visible mini-frame-completions-frame)
     (window--display-buffer buffer (frame-selected-window mini-frame-completions-frame) 'frame alist)))
 
 (defun mini-frame--display (fn args)
