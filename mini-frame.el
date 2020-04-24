@@ -64,6 +64,8 @@
 
 ;;; Code:
 
+(require 'cl-lib)
+
 (defgroup mini-frame nil
   "Show minibuffer in child frame."
   :group 'minibuffer)
@@ -136,7 +138,6 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 
 
 (defvar mini-frame-frame nil)
-(defvar mini-frame-selected-frame nil)
 (defvar mini-frame-selected-window nil)
 (defvar mini-frame-completions-frame nil)
 
@@ -206,13 +207,15 @@ This function used as value for `resize-mini-frames' variable."
     (undecorated . t)
     (desktop-dont-save . t)
     (internal-border-width . 3)
-    (drag-internal-border . t))
+    (drag-internal-border . t)
+    (z-group . above))
   "Common frame parameters for mini-frame and completions frame.")
 
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
-  (let* ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
+  (let* ((parent-frame (frame-parameter mini-frame-frame 'parent-frame))
+         (parent-frame-parameters `((parent-frame . ,parent-frame)))
          (show-parameters (if (functionp mini-frame-completions-show-parameters)
                               (funcall mini-frame-completions-show-parameters)
                             mini-frame-completions-show-parameters))
@@ -253,11 +256,9 @@ ALIST is passed to `window--display-buffer'."
                                   show-parameters)))
     (if (frame-live-p mini-frame-frame)
         (unless selected-is-mini-frame
-          (setq mini-frame-selected-frame selected-frame)
           (setq mini-frame-selected-window selected-window)
           (modify-frame-parameters mini-frame-frame parent-frame-parameters))
       (progn
-        (setq mini-frame-selected-frame selected-frame)
         (setq mini-frame-selected-window selected-window)
         (setq mini-frame-frame
               (make-frame (append '((minibuffer . only))
@@ -270,7 +271,7 @@ ALIST is passed to `window--display-buffer'."
                (frame-visible-p mini-frame-completions-frame))
       (make-frame-invisible mini-frame-completions-frame))
     (make-frame-visible mini-frame-frame)
-    (select-frame-set-input-focus mini-frame-frame)
+    (select-frame-set-input-focus mini-frame-frame 'norecord)
     (setq default-directory dd)
     (apply fn args)))
 
@@ -292,7 +293,7 @@ ALIST is passed to `window--display-buffer'."
    ((eq frame mini-frame-frame)
     (when (frame-live-p mini-frame-completions-frame)
       (make-frame-invisible mini-frame-completions-frame))
-    (select-frame-set-input-focus mini-frame-selected-frame))))
+    (select-frame-set-input-focus (frame-parameter mini-frame-frame 'parent-frame)))))
 
 (defvar which-key-popup-type)
 (defvar ivy-fixed-height-minibuffer)
@@ -309,10 +310,11 @@ ALIST is passed to `window--display-buffer'."
                          (eq ignored-command this-command))
                    (throw 'ignored t))))))
     (apply fn args))
-   ((and (frame-live-p mini-frame-frame)
-         (frame-visible-p mini-frame-frame))
-    (mini-frame--display fn args))
    (t
+    (when (and (frame-live-p mini-frame-frame)
+               (frame-visible-p mini-frame-frame)
+               (= (recursion-depth) 0))
+      (make-frame-invisible mini-frame-frame))
     (let ((after-make-frame-functions nil)
           (resize-mini-frames (when mini-frame-resize
                                 #'mini-frame--resize-mini-frame))
@@ -336,15 +338,24 @@ ALIST is passed to `window--display-buffer'."
       (ignore which-key-popup-type)
       (unwind-protect
           (mini-frame--display fn args)
-        (when (frame-live-p mini-frame-completions-frame)
-          (make-frame-invisible mini-frame-completions-frame))
-        (when (frame-live-p mini-frame-selected-frame)
-          (select-frame-set-input-focus mini-frame-selected-frame))
-        (when (frame-live-p mini-frame-frame)
-          (if (eq system-type 'windows-nt)
-              ;; FIXME sometime buffer is not visible on windows
-              (delete-frame mini-frame-frame)
-            (make-frame-invisible mini-frame-frame))))))))
+        (when (= (recursion-depth) 0)
+          (when (frame-live-p mini-frame-completions-frame)
+            (make-frame-invisible mini-frame-completions-frame)
+            (modify-frame-parameters mini-frame-completions-frame '((parent-frame))))
+          (if (frame-parameter mini-frame-frame 'parent-frame)
+              (select-frame-set-input-focus
+               (frame-parameter mini-frame-frame 'parent-frame))
+            ;; trying to find an alternate frame to return the focus
+            (when-let (fr (cl-find-if-not
+                           (lambda (fr)
+                             (or (equal fr mini-frame-completions-frame)
+                                 (equal fr mini-frame-frame)
+                                 (frame-parameter fr 'parent-frame)))
+                           (frame-list)))
+              (select-frame-set-input-focus fr)))
+          (when (frame-live-p mini-frame-frame)
+            (make-frame-invisible mini-frame-frame)
+            (modify-frame-parameters mini-frame-frame '((parent-frame))))))))))
 
 ;;;###autoload
 (define-minor-mode mini-frame-mode
