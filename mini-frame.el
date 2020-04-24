@@ -301,7 +301,9 @@ ALIST is passed to `window--display-buffer'."
           (delete-frame-functions
            (cons #'mini-frame--delete-frame delete-frame-functions))
           ;; FIXME which-key is not working in mini frame
-          (which-key-popup-type 'frame))
+          (which-key-popup-type 'frame)
+          (ivy-fixed-height-minibuffer nil))
+      (ignore ivy-fixed-height-minibuffer)
       (ignore resize-mini-frames)
       (ignore which-key-popup-type)
       (unwind-protect
