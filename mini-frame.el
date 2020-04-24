@@ -316,19 +316,31 @@ ALIST is passed to `window--display-buffer'."
               (delete-frame mini-frame-frame)
             (make-frame-invisible mini-frame-frame))))))))
 
+(declare-function ivy--minibuffer-setup "ext:ivy")
+
 ;;;###autoload
 (define-minor-mode mini-frame-mode
   "Show minibuffer in child frame on read-from-minibuffer."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer))
+    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
+    (advice-add 'ivy--minibuffer-setup :around #'mini-frame--ivy-minibuffer-setup))
    (t
+    (advice-remove 'ivy--minibuffer-setup #'mini-frame--ivy-minibuffer-setup)
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
     (when (frame-live-p mini-frame-completions-frame)
       (delete-frame mini-frame-completions-frame)))))
+
+;; Compability
+(defun mini-frame--ivy-minibuffer-setup (fn &rest args)
+  "Function to adviced around `ivy--minibuffer-setup'.
+FN and ARGS are from `advice-add'."
+  (let (ivy-fixed-height-minibuffer)
+    (ignore ivy-fixed-height-minibuffer)
+    (apply fn args)))
 
 (provide 'mini-frame)
 
