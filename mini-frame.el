@@ -117,11 +117,16 @@ If nil, leave focus as is."
   :type 'function)
 
 (defcustom mini-frame-resize t
-  "Resize mini frame.
-If non-nil, set `resize-mini-frames' option to `mini-frame--resize-mini-frame'
-which will fit frame to buffer vertically only.
+  "How to resize mini-frame.
+A value of nil means don't autotomatically resize mini-frame.
+A value of t means set `resize-mini-frames' option to
+`mini-frame--resize-mini-frame'which will fit frame to buffer vertically only.
+A value of `grow-only' means let mini-frame grow only;
+
 Option `resize-mini-frames' is available on Emacs 27 and later."
-  :type 'boolean)
+  :type '(choice (const :tag "Don't resize" nil)
+                 (const :tag "Always resize" t)
+                 (const :tag "Grow only" grow-only)))
 
 (defcustom mini-frame-resize-max-height nil
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
@@ -154,7 +159,13 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (fit-frame-to-buffer frame mini-frame-resize-max-height nil nil nil 'vertically)
+  (cond
+   ((eq mini-frame-resize 'grow-only)
+    (fit-frame-to-buffer frame mini-frame-resize-max-height
+                         (frame-parameter frame 'height)
+                         nil nil 'vertically))
+   ((eq mini-frame-resize t)
+    (fit-frame-to-buffer frame mini-frame-resize-max-height nil nil nil 'vertically)))
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
