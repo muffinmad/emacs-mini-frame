@@ -272,6 +272,9 @@ ALIST is passed to `window--display-buffer'."
       (make-frame-invisible mini-frame-completions-frame))
     (select-frame-set-input-focus mini-frame-selected-frame))))
 
+(defvar which-key-popup-type)
+(defvar ivy-fixed-height-minibuffer)
+
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
