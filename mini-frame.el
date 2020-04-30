@@ -219,6 +219,7 @@ ALIST is passed to `window--display-buffer'."
                                   (keep-ratio . t)
                                   (minibuffer . nil)
                                   (undecorated . t)
+                                  (desktop-dont-save . t)
                                   (internal-border-width . 3)
                                   (drag-internal-border . t))
                                 parent-frame-parameters
@@ -254,6 +255,7 @@ ALIST is passed to `window--display-buffer'."
               (make-frame (append '((visibility . nil)
                                     (minibuffer . only)
                                     (undecorated . t)
+                                    (desktop-dont-save . t)
                                     (keep-ratio . t)
                                     (user-position . t)
                                     (user-size . t)
