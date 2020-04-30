@@ -197,6 +197,17 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
+(defconst mini-frame--common-parameters
+  '((visibility . nil)
+    (user-position . t)
+    (user-size . t)
+    (keep-ratio . t)
+    (undecorated . t)
+    (desktop-dont-save . t)
+    (internal-border-width . 3)
+    (drag-internal-border . t))
+  "Common frame parameters for mini-frame and completions frame.")
+
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
@@ -212,16 +223,9 @@ ALIST is passed to `window--display-buffer'."
     (if (frame-live-p mini-frame-completions-frame)
         (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
       (setq mini-frame-completions-frame
-            (make-frame (append '((visibility . nil)
-                                  (auto-hide-function . mini-frame--hide-completions)
-                                  (user-position . t)
-                                  (user-size . t)
-                                  (keep-ratio . t)
-                                  (minibuffer . nil)
-                                  (undecorated . t)
-                                  (desktop-dont-save . t)
-                                  (internal-border-width . 3)
-                                  (drag-internal-border . t))
+            (make-frame (append '((auto-hide-function . mini-frame--hide-completions)
+                                  (minibuffer . nil))
+                                mini-frame--common-parameters
                                 parent-frame-parameters
                                 show-parameters)))
       (set-face-background 'fringe nil mini-frame-completions-frame))
@@ -252,15 +256,8 @@ ALIST is passed to `window--display-buffer'."
       (progn
         (setq mini-frame-selected-frame selected-frame)
         (setq mini-frame-frame
-              (make-frame (append '((visibility . nil)
-                                    (minibuffer . only)
-                                    (undecorated . t)
-                                    (desktop-dont-save . t)
-                                    (keep-ratio . t)
-                                    (user-position . t)
-                                    (user-size . t)
-                                    (internal-border-width . 3)
-                                    (drag-internal-border . t))
+              (make-frame (append '((minibuffer . only))
+                                  mini-frame--common-parameters
                                   parent-frame-parameters
                                   show-parameters)))
         (set-face-background 'fringe nil mini-frame-frame)))
