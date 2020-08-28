@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.1
+;; Package-Version: 1.2
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -137,6 +137,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
+(defvar mini-frame-selected-window nil)
 (defvar mini-frame-completions-frame nil)
 
 (defun mini-frame--shift-color (from to &optional by)
@@ -238,6 +239,7 @@ ALIST is passed to `window--display-buffer'."
 (defun mini-frame--display (fn args)
   "Show mini-frame and call FN with ARGS."
   (let* ((selected-frame (selected-frame))
+         (selected-window (selected-window))
          (selected-is-mini-frame (memq selected-frame
                                        (list mini-frame-frame
                                              mini-frame-completions-frame)))
@@ -252,9 +254,11 @@ ALIST is passed to `window--display-buffer'."
     (if (frame-live-p mini-frame-frame)
         (unless selected-is-mini-frame
           (setq mini-frame-selected-frame selected-frame)
+          (setq mini-frame-selected-window selected-window)
           (modify-frame-parameters mini-frame-frame parent-frame-parameters))
       (progn
         (setq mini-frame-selected-frame selected-frame)
+        (setq mini-frame-selected-window selected-window)
         (setq mini-frame-frame
               (make-frame (append '((minibuffer . only))
                                   mini-frame--common-parameters
@@ -269,6 +273,14 @@ ALIST is passed to `window--display-buffer'."
     (select-frame-set-input-focus mini-frame-frame)
     (setq default-directory dd)
     (apply fn args)))
+
+(defun mini-frame--minibuffer-selected-window (fn &rest args)
+  "Call FN with ARGS.  Return window selected just before mini-frame window was selected."
+  (let ((window (apply fn args)))
+    (if (and window
+             (eq mini-frame-frame (window-frame window)))
+        mini-frame-selected-window
+      window)))
 
 (defun mini-frame--delete-frame (frame)
   "Called before delete FRAME."
@@ -340,9 +352,11 @@ ALIST is passed to `window--display-buffer'."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer))
+    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
+    (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
+    (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
     (when (frame-live-p mini-frame-completions-frame)
