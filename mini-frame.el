@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.2.1
+;; Package-Version: 1.3
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -133,6 +133,12 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 (defcustom mini-frame-resize-max-height nil
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
   :type 'integer)
+
+(defcustom mini-frame-create-lazy nil
+  "Create mini-frame lazily.
+If non-nil, mini-frame will be created on first use.
+If nil, mini-frame will be created on the mode activation."
+  :type 'boolean)
 
 
 (defvar mini-frame-frame nil)
@@ -354,7 +360,12 @@ ALIST is passed to `window--display-buffer'."
   (cond
    (mini-frame-mode
     (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-    (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window))
+    (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
+    (unless mini-frame-create-lazy
+      (let ((after-make-frame-functions nil))
+        (setq mini-frame-frame
+              (make-frame (append '((minibuffer . only))
+                                  mini-frame--common-parameters))))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
