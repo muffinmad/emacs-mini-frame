@@ -92,6 +92,11 @@ to determine background color of mini frame."
 Called if `mini-frame-show-parameters' doesn't specify background color."
   :type 'function)
 
+(defcustom mini-frame-internal-border-color nil
+  "MiniFrame internal border color."
+   :type '(choice (const :tag "None" nil)
+                  (color :tag "Color")))
+
 (defcustom mini-frame-handle-completions t
   "Create child frame to display completions buffer."
   :type 'boolean)
@@ -235,6 +240,8 @@ ALIST is passed to `window--display-buffer'."
                                 mini-frame--common-parameters
                                 parent-frame-parameters
                                 show-parameters)))
+      (when mini-frame-internal-border-color
+        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-completions-frame))
       (set-face-background 'fringe nil mini-frame-completions-frame))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
@@ -270,6 +277,8 @@ ALIST is passed to `window--display-buffer'."
                                   mini-frame--common-parameters
                                   parent-frame-parameters
                                   show-parameters)))
+        (when mini-frame-internal-border-color
+          (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame))
         (set-face-background 'fringe nil mini-frame-frame)))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
@@ -368,7 +377,9 @@ ALIST is passed to `window--display-buffer'."
       (let ((after-make-frame-functions nil))
         (setq mini-frame-frame
               (make-frame (append '((minibuffer . only))
-                                  mini-frame--common-parameters))))))
+                                  mini-frame--common-parameters)))
+      (when mini-frame-internal-border-color
+        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame)))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
