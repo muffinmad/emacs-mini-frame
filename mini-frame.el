@@ -269,17 +269,16 @@ ALIST is passed to `window--display-buffer'."
           (setq mini-frame-selected-frame selected-frame)
           (setq mini-frame-selected-window selected-window)
           (modify-frame-parameters mini-frame-frame parent-frame-parameters))
-      (progn
-        (setq mini-frame-selected-frame selected-frame)
-        (setq mini-frame-selected-window selected-window)
-        (setq mini-frame-frame
-              (make-frame (append '((minibuffer . only))
-                                  mini-frame--common-parameters
-                                  parent-frame-parameters
-                                  show-parameters)))
-        (when mini-frame-internal-border-color
-          (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame))
-        (set-face-background 'fringe nil mini-frame-frame)))
+      (setq mini-frame-selected-frame selected-frame)
+      (setq mini-frame-selected-window selected-window)
+      (setq mini-frame-frame
+            (make-frame (append '((minibuffer . only))
+                                mini-frame--common-parameters
+                                parent-frame-parameters
+                                show-parameters)))
+      (when mini-frame-internal-border-color
+        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame))
+      (set-face-background 'fringe nil mini-frame-frame))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
