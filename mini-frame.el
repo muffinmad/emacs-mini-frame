@@ -221,6 +221,15 @@ This function used as value for `resize-mini-frames' variable."
     (drag-internal-border . t))
   "Common frame parameters for mini-frame and completions frame.")
 
+(defun mini-frame--make-frame (parameters)
+  "Make frame with common parameters and PARAMETERS."
+  (let ((frame (make-frame (append parameters
+                                   mini-frame--common-parameters))))
+    (set-face-background 'fringe nil frame)
+    (when mini-frame-internal-border-color
+      (set-face-background 'internal-border mini-frame-internal-border-color frame))
+    frame))
+
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
@@ -236,14 +245,9 @@ ALIST is passed to `window--display-buffer'."
     (if (frame-live-p mini-frame-completions-frame)
         (modify-frame-parameters mini-frame-completions-frame parent-frame-parameters)
       (setq mini-frame-completions-frame
-            (make-frame (append '((auto-hide-function . mini-frame--hide-completions)
-                                  (minibuffer . nil))
-                                mini-frame--common-parameters
-                                parent-frame-parameters
-                                show-parameters)))
-      (when mini-frame-internal-border-color
-        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-completions-frame))
-      (set-face-background 'fringe nil mini-frame-completions-frame))
+            (mini-frame--make-frame (append '((auto-hide-function . mini-frame--hide-completions)
+                                              (minibuffer . nil))
+                                            parent-frame-parameters))))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
     (let ((w (frame-selected-window mini-frame-completions-frame)))
@@ -273,13 +277,8 @@ ALIST is passed to `window--display-buffer'."
       (setq mini-frame-selected-frame selected-frame)
       (setq mini-frame-selected-window selected-window)
       (setq mini-frame-frame
-            (make-frame (append '((minibuffer . only))
-                                mini-frame--common-parameters
-                                parent-frame-parameters
-                                show-parameters)))
-      (when mini-frame-internal-border-color
-        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame))
-      (set-face-background 'fringe nil mini-frame-frame))
+            (mini-frame--make-frame (append '((minibuffer . only))
+                                            parent-frame-parameters))))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
@@ -376,10 +375,7 @@ ALIST is passed to `window--display-buffer'."
     (unless mini-frame-create-lazy
       (let ((after-make-frame-functions nil))
         (setq mini-frame-frame
-              (make-frame (append '((minibuffer . only))
-                                  mini-frame--common-parameters)))
-      (when mini-frame-internal-border-color
-        (set-face-background 'internal-border mini-frame-internal-border-color mini-frame-frame)))))
+              (mini-frame--make-frame '((minibuffer . only)))))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
