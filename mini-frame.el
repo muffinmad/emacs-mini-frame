@@ -210,21 +210,17 @@ This function used as value for `resize-mini-frames' variable."
       (when (and (frame-live-p frame) (frame-visible-p frame))
         (select-frame-set-input-focus frame)))))
 
-(defconst mini-frame--common-parameters
-  '((visibility . nil)
-    (user-position . t)
-    (user-size . t)
-    (keep-ratio . t)
-    (undecorated . t)
-    (desktop-dont-save . t)
-    (internal-border-width . 3)
-    (drag-internal-border . t))
-  "Common frame parameters for mini-frame and completions frame.")
-
 (defun mini-frame--make-frame (parameters)
   "Make frame with common parameters and PARAMETERS."
   (let ((frame (make-frame (append parameters
-                                   mini-frame--common-parameters))))
+                                   '((visibility . nil)
+                                     (user-position . t)
+                                     (user-size . t)
+                                     (keep-ratio . t)
+                                     (undecorated . t)
+                                     (desktop-dont-save . t)
+                                     (internal-border-width . 3)
+                                     (drag-internal-border . t))))))
     (set-face-background 'fringe nil frame)
     (when mini-frame-internal-border-color
       (set-face-background 'internal-border mini-frame-internal-border-color frame))
