@@ -310,7 +310,9 @@ ALIST is passed to `window--display-buffer'."
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
-   ((or (minibufferp)
+   ((or (and (minibufferp)
+             (or (not (frame-live-p mini-frame-frame))
+                 (not (frame-visible-p mini-frame-frame))))
         (and (symbolp this-command)
              (catch 'ignored
                (dolist (ignored-command mini-frame-ignore-commands)
