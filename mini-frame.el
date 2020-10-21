@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.5
+;; Package-Version: 1.6
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -369,6 +369,7 @@ ALIST is passed to `window--display-buffer'."
   (cond
    (mini-frame-mode
     (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
+    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer)
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
       (let ((after-make-frame-functions nil))
@@ -376,6 +377,7 @@ ALIST is passed to `window--display-buffer'."
               (mini-frame--make-frame '((minibuffer . only)))))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
+    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
