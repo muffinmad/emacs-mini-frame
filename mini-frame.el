@@ -94,9 +94,9 @@ Called if `mini-frame-show-parameters' doesn't specify background color."
 
 (defcustom mini-frame-internal-border-color nil
   "When set, set the internal border color of mini-frames to this color."
-   :type '(choice (const :tag "Not set" nil)
-                  (color :tag "Color")
-                  (const :tag "Unspecified" 'unspecified)))
+  :type '(choice (const :tag "Not set" nil)
+                 (color :tag "Color")
+                 (const :tag "Unspecified" 'unspecified)))
 
 (defcustom mini-frame-handle-completions t
   "Create child frame to display completions buffer."
