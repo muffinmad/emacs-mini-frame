@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.7
+;; Package-Version: 1.8
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -67,6 +67,11 @@
 (defgroup mini-frame nil
   "Show minibuffer in child frame."
   :group 'minibuffer)
+
+(defcustom mini-frame-advice-functions '(read-from-minibuffer read-string)
+  "Functions to advice with `mini-frame-read-from-minibuffer'.
+Set this variable before `mini-frame' mode activation."
+  :type '(repeat function))
 
 (defcustom mini-frame-ignore-commands '(eval-expression "edebug-eval-expression" debugger-eval-expression)
   "For this commands minibuffer will not be displayed in child frame."
@@ -370,8 +375,9 @@ ALIST is passed to `window--display-buffer'."
   :global t
   (cond
    (mini-frame-mode
-    (advice-add 'read-from-minibuffer :around #'mini-frame-read-from-minibuffer)
-    (advice-add 'read-string :around #'mini-frame-read-from-minibuffer)
+    (mapc #'(lambda (fn)
+              (advice-add fn :around #'mini-frame-read-from-minibuffer))
+          mini-frame-advice-functions)
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
       (add-hook 'window-setup-hook
@@ -380,8 +386,9 @@ ALIST is passed to `window--display-buffer'."
                       (setq mini-frame-frame
                             (mini-frame--make-frame '((minibuffer . only)))))))))
    (t
-    (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
-    (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
+    (mapc #'(lambda (fn)
+              (advice-remove fn #'mini-frame-read-from-minibuffer))
+          mini-frame-advice-functions)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
