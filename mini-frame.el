@@ -243,7 +243,8 @@ ALIST is passed to `window--display-buffer'."
       (setq mini-frame-completions-frame
             (mini-frame--make-frame (append '((auto-hide-function . mini-frame--hide-completions)
                                               (minibuffer . nil))
-                                            parent-frame-parameters))))
+                                            parent-frame-parameters
+                                            show-parameters))))
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
     (let ((w (frame-selected-window mini-frame-completions-frame)))
@@ -274,7 +275,8 @@ ALIST is passed to `window--display-buffer'."
       (setq mini-frame-selected-window selected-window)
       (setq mini-frame-frame
             (mini-frame--make-frame (append '((minibuffer . only))
-                                            parent-frame-parameters))))
+                                            parent-frame-parameters
+                                            show-parameters))))
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
