@@ -140,7 +140,7 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
   :type 'integer)
 
-(defcustom mini-frame-create-lazy nil
+(defcustom mini-frame-create-lazy t
   "Create mini-frame lazily.
 If non-nil, mini-frame will be created on first use.
 If nil, mini-frame will be created on the mode activation."
@@ -374,9 +374,11 @@ ALIST is passed to `window--display-buffer'."
     (advice-add 'read-string :around #'mini-frame-read-from-minibuffer)
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
-      (let ((after-make-frame-functions nil))
-        (setq mini-frame-frame
-              (mini-frame--make-frame '((minibuffer . only)))))))
+      (add-hook 'window-setup-hook
+                #'(lambda ()
+                    (let ((after-make-frame-functions nil))
+                      (setq mini-frame-frame
+                            (mini-frame--make-frame '((minibuffer . only)))))))))
    (t
     (advice-remove 'read-from-minibuffer #'mini-frame-read-from-minibuffer)
     (advice-remove 'read-string #'mini-frame-read-from-minibuffer)
