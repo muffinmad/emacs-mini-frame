@@ -63,6 +63,12 @@ Users of Emacs 26 will need to configure frame height explicitly, e.g.:
 
 Until [this issue](https://gitlab.gnome.org/GNOME/mutter/-/issues/840) will be solved, Gnome Shell users must also set mini-frame height.
 
+Another option for Gnome Shell users is to use the following code in initialization file:
+
+```elisp
+(setq x-gtk-resize-child-frames 'resize-mode)
+```
+
 ## Ignore commands
 
 One can configure the list of commands that must not be shown in the child frame by customizing the `mini-frame-ignore-commands`. The `eval-expression` command is there by default because mini-frame have no modeline to display eldoc hints. And because there must be some place to turn `mini-frame-mode` off if something goes wrong (I hope not) :)
