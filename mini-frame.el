@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.8
+;; Package-Version: 1.8.1
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -143,7 +143,8 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
 
 (defcustom mini-frame-resize-max-height nil
   "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
-  :type 'integer)
+  :type '(choice (const :tag "Not set" nil)
+                 (integer :tag "Lines count")))
 
 (defcustom mini-frame-create-lazy t
   "Create mini-frame lazily.
