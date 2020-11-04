@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.8.2
+;; Package-Version: 1.8.3
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -177,14 +177,21 @@ If nil, mini-frame will be created on the mode activation."
             (mini-frame--shift-color (cadr bg) (cadr fg))
             (mini-frame--shift-color (caddr bg) (caddr fg)))))
 
+(defconst mini-frame--fit-frame-function
+  (if (functionp 'fit-frame-to-buffer-1)
+      'fit-frame-to-buffer-1
+    'fit-frame-to-buffer)
+  "Function used to fit mini-frame to buffer.")
+
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (fit-frame-to-buffer frame
-                       mini-frame-resize-max-height
-                       (when (eq mini-frame-resize 'grow-only)
-                         (frame-parameter frame 'height))
-                       nil nil 'vertically)
+  (funcall mini-frame--fit-frame-function
+           frame
+           mini-frame-resize-max-height
+           (when (eq mini-frame-resize 'grow-only)
+             (frame-parameter frame 'height))
+           nil nil 'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
