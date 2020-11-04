@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.8.1
+;; Package-Version: 1.8.2
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -318,7 +318,8 @@ ALIST is passed to `window--display-buffer'."
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
-   ((or (minibufferp)
+   ((or (not (display-graphic-p))
+        (minibufferp)
         (and (symbolp this-command)
              (catch 'ignored
                (dolist (ignored-command mini-frame-ignore-commands)
