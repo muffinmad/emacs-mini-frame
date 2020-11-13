@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.8.4
+;; Package-Version: 1.8.5
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -132,17 +132,19 @@ If nil, leave focus as is."
 A value of nil means don't autotomatically resize mini-frame.
 A value of t means autotomatically resize mini-frame.
 A value of `grow-only' means let mini-frame grow only.
+A value of `not-set' means to not override `resize-mini-frames'.
 
-If non-nil, `resize-mini-frames' will be set to
+If t or `grow-only', `resize-mini-frames' will be set to
 `mini-frame--resize-mini-frame' function.
 
 Option `resize-mini-frames' is available on Emacs 27 and later."
   :type '(choice (const :tag "Don't resize" nil)
                  (const :tag "Resize" t)
-                 (const :tag "Grow only" grow-only)))
+                 (const :tag "Grow only" grow-only)
+                 (const :tag "Don't set" not-set)))
 
 (defcustom mini-frame-resize-max-height nil
-  "Max height boundary for mini-frame when `mini-frame-resize' is non-nil."
+  "Max height boundary for mini-frame when `mini-frame-resize' is set."
   :type '(choice (const :tag "Not set" nil)
                  (integer :tag "Lines count")))
 
@@ -347,8 +349,10 @@ ALIST is passed to `window--display-buffer'."
                (frame-visible-p mini-frame-frame))
       (make-frame-invisible mini-frame-frame))
     (let ((after-make-frame-functions nil)
-          (resize-mini-frames (when mini-frame-resize
-                                #'mini-frame--resize-mini-frame))
+          (resize-mini-frames (if (eq mini-frame-resize 'not-set)
+                                  resize-mini-frames
+                                (when mini-frame-resize
+                                  #'mini-frame--resize-mini-frame)))
           (display-buffer-alist
            (if mini-frame-handle-completions
                (append
