@@ -77,6 +77,11 @@ Set this variable before `mini-frame' mode activation."
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat (choice function regexp)))
 
+(defcustom mini-frame-ignore-functions nil
+  "This functions will be advised to not display minibuffer in child frame.
+Set this variable before `mini-frame' mode activation."
+  :type '(repeat function))
+
 (defcustom mini-frame-show-parameters '((left . 0.5)
                                         (top . 0)
                                         (width . 1.0)
@@ -165,6 +170,7 @@ This allow to avoid mini-frame recreation in case its parent frame were deleted.
 (defvar mini-frame-selected-frame nil)
 (defvar mini-frame-selected-window nil)
 (defvar mini-frame-completions-frame nil)
+(defvar mini-frame-ignore-this nil)
 
 (defun mini-frame--shift-color (from to &optional by)
   "Move color FROM towards TO by BY.  If BY is omitted, `mini-frame-color-shift-step' is used."
@@ -330,10 +336,16 @@ ALIST is passed to `window--display-buffer'."
 (defvar which-key-popup-type)
 (defvar ivy-fixed-height-minibuffer)
 
+(defun mini-frame--ignore-function (fn &rest args)
+  "Let `mini-frame-ignore-this' and call FN with ARGS."
+  (let ((mini-frame-ignore-this t))
+    (apply fn args)))
+
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
-   ((or (not (display-graphic-p))
+   ((or mini-frame-ignore-this
+        (not (display-graphic-p))
         (minibufferp)
         (and (symbolp this-command)
              (catch 'ignored
@@ -390,6 +402,12 @@ ALIST is passed to `window--display-buffer'."
             (when mini-frame-detach-on-hide
               (modify-frame-parameters mini-frame-frame '((parent-frame . nil)))))))))))
 
+(defun mini-frame--advice (funcs func &optional remove)
+  "Add advice FUNC around FUNCS.  If REMOVE, remove advice instead."
+  (mapc (lambda (fn)
+          (if remove (advice-remove fn func) (advice-add fn :around func)))
+        funcs))
+
 ;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=2ecbf4cfae
 ;; By default minibuffer is moved onto active frame leaving empty mini-frame.
 ;; Disable this behavior on mini-frame-mode.
@@ -405,9 +423,8 @@ ALIST is passed to `window--display-buffer'."
     (when (boundp 'minibuffer-follows-selected-frame)
       (setq mini-frame--minibuffer-follows-selected-frame minibuffer-follows-selected-frame)
       (setq minibuffer-follows-selected-frame nil))
-    (mapc #'(lambda (fn)
-              (advice-add fn :around #'mini-frame-read-from-minibuffer))
-          mini-frame-advice-functions)
+    (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer)
+    (mini-frame--advice mini-frame-ignore-functions #'mini-frame--ignore-function)
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
       (add-hook 'window-setup-hook
@@ -418,9 +435,8 @@ ALIST is passed to `window--display-buffer'."
    (t
     (when (boundp 'minibuffer-follows-selected-frame)
       (setq minibuffer-follows-selected-frame mini-frame--minibuffer-follows-selected-frame))
-    (mapc #'(lambda (fn)
-              (advice-remove fn #'mini-frame-read-from-minibuffer))
-          mini-frame-advice-functions)
+    (mini-frame--advice mini-frame-advice-functions #'mini-frame-read-from-minibuffer t)
+    (mini-frame--advice mini-frame-ignore-functions #'mini-frame--ignore-function t)
     (advice-remove 'minibuffer-selected-window #'mini-frame--minibuffer-selected-window)
     (when (frame-live-p mini-frame-frame)
       (delete-frame mini-frame-frame))
