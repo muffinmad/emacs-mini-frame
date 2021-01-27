@@ -347,7 +347,7 @@ ALIST is passed to `window--display-buffer'."
          (frame-visible-p mini-frame-frame))
     (save-current-buffer
       (save-window-excursion
-	(mini-frame--display fn args))))
+        (mini-frame--display fn args))))
    (t
     ;; On windows `frame-visible-p' can be t even if the frame is not visible so
     ;; calling `make-frame-visible' doesn't make frame actually visible.  Make frame
@@ -379,17 +379,17 @@ ALIST is passed to `window--display-buffer'."
       (ignore resize-mini-frames)
       (ignore which-key-popup-type)
       (save-current-buffer
-	(save-window-excursion
-	  (unwind-protect
-	      (mini-frame--display fn args)
-	    (when (frame-live-p mini-frame-completions-frame)
-	      (make-frame-invisible mini-frame-completions-frame))
-	    (when (frame-live-p mini-frame-selected-frame)
-	      (select-frame-set-input-focus mini-frame-selected-frame))
-	    (when (frame-live-p mini-frame-frame)
-	      (make-frame-invisible mini-frame-frame)
-	      (when mini-frame-detach-on-hide
-		(modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))))
+        (save-window-excursion
+          (unwind-protect
+              (mini-frame--display fn args)
+            (when (frame-live-p mini-frame-completions-frame)
+              (make-frame-invisible mini-frame-completions-frame))
+            (when (frame-live-p mini-frame-selected-frame)
+              (select-frame-set-input-focus mini-frame-selected-frame))
+            (when (frame-live-p mini-frame-frame)
+              (make-frame-invisible mini-frame-frame)
+              (when mini-frame-detach-on-hide
+                (modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))))
 
 ;; http://git.savannah.gnu.org/cgit/emacs.git/commit/?id=2ecbf4cfae
 ;; By default minibuffer is moved onto active frame leaving empty mini-frame.
