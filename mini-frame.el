@@ -345,9 +345,7 @@ ALIST is passed to `window--display-buffer'."
    ((and (frame-live-p mini-frame-frame)
          (frame-parameter mini-frame-frame 'parent-frame)
          (frame-visible-p mini-frame-frame))
-    (save-current-buffer
-      (save-window-excursion
-        (mini-frame--display fn args))))
+    (mini-frame--display fn args))
    (t
     ;; On windows `frame-visible-p' can be t even if the frame is not visible so
     ;; calling `make-frame-visible' doesn't make frame actually visible.  Make frame
