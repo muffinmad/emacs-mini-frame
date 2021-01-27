@@ -113,7 +113,8 @@ Called if `mini-frame-show-parameters' doesn't specify background color."
   "Frame parameters which will be applied to completions frame on show.
 Unless background-color is specified it will be set to background color
 of mini frame.
-Unless top is specified it will be set to result of `mini-frame-completions-top-function'."
+Unless top is specified it will be set to result of the
+`mini-frame-completions-top-function'."
   :type '(choice alist function))
 
 (defcustom mini-frame-completions-focus 'minibuffer
