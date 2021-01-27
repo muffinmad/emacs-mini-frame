@@ -428,10 +428,10 @@ ALIST is passed to `window--display-buffer'."
     (advice-add 'minibuffer-selected-window :around #'mini-frame--minibuffer-selected-window)
     (unless mini-frame-create-lazy
       (add-hook 'window-setup-hook
-                #'(lambda ()
-                    (let ((after-make-frame-functions nil))
-                      (setq mini-frame-frame
-                            (mini-frame--make-frame '((minibuffer . only)))))))))
+                (lambda ()
+                  (let ((after-make-frame-functions nil))
+                    (setq mini-frame-frame
+                          (mini-frame--make-frame '((minibuffer . only)))))))))
    (t
     (when (boundp 'minibuffer-follows-selected-frame)
       (setq minibuffer-follows-selected-frame mini-frame--minibuffer-follows-selected-frame))
