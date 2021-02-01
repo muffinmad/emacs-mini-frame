@@ -224,7 +224,8 @@ This function used as value for `resize-mini-frames' variable."
 
 (defun mini-frame-get-completions-top ()
   "Calculate top of completions frame to be just below mini frame."
-  (+ (* 2 (frame-parameter mini-frame-frame 'internal-border-width))
+  (+ (* 2 (or (frame-parameter mini-frame-frame 'child-frame-border-width)
+              (frame-parameter mini-frame-frame 'internal-border-width)))
      (frame-parameter mini-frame-frame 'top)
      (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
 
@@ -246,6 +247,7 @@ This function used as value for `resize-mini-frames' variable."
                                      (keep-ratio . t)
                                      (undecorated . t)
                                      (desktop-dont-save . t)
+                                     (child-frame-border-width . 3)
                                      (internal-border-width . 3)
                                      (drag-internal-border . t))))))
     (set-face-background 'fringe nil frame)
