@@ -165,6 +165,10 @@ If nil, mini-frame will be created on the mode activation."
 This allow to avoid mini-frame recreation in case its parent frame were deleted."
   :type 'boolean)
 
+(defcustom mini-frame-standalone nil
+  "Make mini-frame frame standalone instead of child-frame."
+  :type 'boolean)
+
 
 (defvar mini-frame-frame nil)
 (defvar mini-frame-selected-frame nil)
@@ -249,7 +253,8 @@ This function used as value for `resize-mini-frames' variable."
                                      (desktop-dont-save . t)
                                      (child-frame-border-width . 3)
                                      (internal-border-width . 3)
-                                     (drag-internal-border . t))))))
+                                     (drag-internal-border . t)
+                                     (z-group . above))))))
     (set-face-background 'fringe nil frame)
     (when mini-frame-internal-border-color
       (set-face-background 'internal-border mini-frame-internal-border-color frame))
@@ -258,7 +263,8 @@ This function used as value for `resize-mini-frames' variable."
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
-  (let* ((parent-frame-parameters `((parent-frame . ,mini-frame-selected-frame)))
+  (let* ((parent-frame-parameters `((parent-frame . ,(unless mini-frame-standalone
+                                                       mini-frame-selected-frame))))
          (show-parameters (if (functionp mini-frame-completions-show-parameters)
                               (funcall mini-frame-completions-show-parameters)
                             mini-frame-completions-show-parameters))
@@ -288,7 +294,8 @@ ALIST is passed to `window--display-buffer'."
                                        (list mini-frame-frame
                                              mini-frame-completions-frame)))
          (dd default-directory)
-         (parent-frame-parameters `((parent-frame . ,selected-frame)))
+         (parent-frame-parameters `((parent-frame . ,(unless mini-frame-standalone
+                                                       selected-frame))))
          (show-parameters (if (functionp mini-frame-show-parameters)
                               (funcall mini-frame-show-parameters)
                             mini-frame-show-parameters))
@@ -358,7 +365,8 @@ ALIST is passed to `window--display-buffer'."
                    (throw 'ignored t))))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
-         (frame-parameter mini-frame-frame 'parent-frame)
+         (or mini-frame-standalone
+             (frame-parameter mini-frame-frame 'parent-frame))
          (frame-visible-p mini-frame-frame))
     (mini-frame--display fn args))
    (t
