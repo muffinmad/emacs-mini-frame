@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.12
+;; Package-Version: 1.13
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
