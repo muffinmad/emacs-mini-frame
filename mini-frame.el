@@ -204,21 +204,23 @@ This allow to avoid mini-frame recreation in case its parent frame were deleted.
 (defun mini-frame--resize-mini-frame (frame)
   "Resize FRAME vertically only.
 This function used as value for `resize-mini-frames' variable."
-  (funcall mini-frame--fit-frame-function
-           frame
-           mini-frame-resize-max-height
-           (when (eq mini-frame-resize 'grow-only)
-             (frame-parameter frame 'height))
-           nil nil 'vertically)
-  (when (and (frame-live-p mini-frame-completions-frame)
-             (frame-visible-p mini-frame-completions-frame))
-    (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
-                               (funcall mini-frame-completions-show-parameters)
-                             mini-frame-completions-show-parameters)))
-      (unless (alist-get 'top show-parameters)
-        (modify-frame-parameters
-         mini-frame-completions-frame
-         `((top . ,(funcall mini-frame-completions-top-function))))))))
+  (run-with-timer 0 nil
+                  (lambda ()
+                    (funcall mini-frame--fit-frame-function
+                             frame
+                             mini-frame-resize-max-height
+                             (when (eq mini-frame-resize 'grow-only)
+                               (frame-parameter frame 'height))
+                             nil nil 'vertically)
+                    (when (and (frame-live-p mini-frame-completions-frame)
+                               (frame-visible-p mini-frame-completions-frame))
+                      (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
+                                                 (funcall mini-frame-completions-show-parameters)
+                                               mini-frame-completions-show-parameters)))
+                        (unless (alist-get 'top show-parameters)
+                          (modify-frame-parameters
+                           mini-frame-completions-frame
+                           `((top . ,(funcall mini-frame-completions-top-function))))))))))
 
 (defun mini-frame--hide-completions (&optional frame _force)
   "Hide completions FRAME."
