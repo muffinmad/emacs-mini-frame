@@ -73,6 +73,8 @@ Another option for Gnome Shell users is to use the following code in initializat
 
 One can configure the list of commands that must not be shown in the child frame by customizing the `mini-frame-ignore-commands`. The `eval-expression` command is there by default because mini-frame have no modeline to display eldoc hints. And because there must be some place to turn `mini-frame-mode` off if something goes wrong (I hope not) :)
 
+If you customize the `mini-frame-accept-commands` mini-buffer will always be set for this even if it was ignored in `mini-frame-ignore-commands`.
+
 ## Installation and usage
 
 `mini-frame` is available on [MELPA](https://melpa.org/#/mini-frame).

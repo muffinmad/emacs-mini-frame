@@ -77,6 +77,10 @@ Set this variable before `mini-frame' mode activation."
   "For this commands minibuffer will not be displayed in child frame."
   :type '(repeat (choice function regexp)))
 
+(defcustom mini-frame-accept-commands '(eval-expression "edebug-eval-expression" debugger-eval-expression)
+  "For this commands minibuffer will always be displayed in child frame."
+  :type '(repeat (choice function regexp)))
+
 (defcustom mini-frame-ignore-functions nil
   "This functions will be advised to not display minibuffer in child frame.
 Set this variable before `mini-frame' mode activation."
@@ -350,6 +354,14 @@ ALIST is passed to `window--display-buffer'."
   (let ((mini-frame-ignore-this t))
     (apply fn args)))
 
+(defun mini-frame--match-command (regexp-list)
+  (catch 'ignored
+    (dolist (ignored-command regexp-list)
+      (when (if (stringp ignored-command)
+                (string-match-p ignored-command (symbol-name this-command))
+              (eq ignored-command this-command))
+        (throw 'ignored t)))))
+
 (defun mini-frame-read-from-minibuffer (fn &rest args)
   "Show minibuffer-only child frame (if needed) and call FN with ARGS."
   (cond
@@ -357,12 +369,10 @@ ALIST is passed to `window--display-buffer'."
         (not (display-graphic-p))
         (minibufferp)
         (and (symbolp this-command)
-             (catch 'ignored
-               (dolist (ignored-command mini-frame-ignore-commands)
-                 (when (if (stringp ignored-command)
-                           (string-match-p ignored-command (symbol-name this-command))
-                         (eq ignored-command this-command))
-                   (throw 'ignored t))))))
+             (and (mini-frame--match-command
+                   mini-frame-ignore-commands)
+                  (not (mini-frame--match-command
+                        mini-frame-accept-commands)))))
     (apply fn args))
    ((and (frame-live-p mini-frame-frame)
          (or mini-frame-standalone
