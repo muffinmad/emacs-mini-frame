@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.13
+;; Package-Version: 1.14
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -83,7 +83,7 @@ Set this variable before `mini-frame' mode activation."
   :type '(repeat function))
 
 (defcustom mini-frame-show-parameters '((left . 0.5)
-                                        (top . 0)
+                                        (top . 0.0)
                                         (width . 1.0)
                                         (height . 1))
   "Frame parameters which will be applied to mini frame on show.
@@ -228,10 +228,20 @@ This function used as value for `resize-mini-frames' variable."
 
 (defun mini-frame-get-completions-top ()
   "Calculate top of completions frame to be just below mini frame."
-  (+ (* 2 (or (frame-parameter mini-frame-frame 'child-frame-border-width)
-              (frame-parameter mini-frame-frame 'internal-border-width)))
-     (frame-parameter mini-frame-frame 'top)
-     (cdr (window-text-pixel-size (frame-selected-window mini-frame-frame)))))
+  (let* ((mini-frame-top (frame-parameter mini-frame-frame 'top))
+         (comp-frame-top
+          (+ (* 2 (or (frame-parameter mini-frame-frame
+                                       'child-frame-border-width)
+                      (frame-parameter mini-frame-frame
+                                       'internal-border-width)))
+             (if (consp mini-frame-top)
+                 (cadr mini-frame-top)
+               mini-frame-top)
+             (cdr (window-text-pixel-size
+                   (frame-selected-window mini-frame-frame))))))
+    (if (consp mini-frame-top)
+        `(,(car mini-frame-top) ,comp-frame-top)
+      comp-frame-top)))
 
 (defun mini-frame--completions-setup ()
   "Completion setup hook."
@@ -260,6 +270,16 @@ This function used as value for `resize-mini-frames' variable."
       (set-face-background 'internal-border mini-frame-internal-border-color frame))
     frame))
 
+(defun mini-frame--move-frame-to-frame (frame to-frame)
+  "Move FRAME to the same monitor as TO-FRAME."
+  (when (and mini-frame-standalone
+               (not (equal (frame-monitor-workarea frame)
+                           (frame-monitor-workarea to-frame))))
+      (modify-frame-parameters frame
+                               (mapcar (lambda (param)
+                                         `(,param . ,(frame-parameter to-frame param)))
+                                       '(left width top)))))
+
 (defun mini-frame--display-completions (buffer alist)
   "Display completions BUFFER in another child frame.
 ALIST is passed to `window--display-buffer'."
@@ -280,6 +300,7 @@ ALIST is passed to `window--display-buffer'."
                                               (minibuffer . nil))
                                             parent-frame-parameters
                                             show-parameters))))
+    (mini-frame--move-frame-to-frame mini-frame-completions-frame mini-frame-frame)
     (modify-frame-parameters mini-frame-completions-frame show-parameters)
     (make-frame-visible mini-frame-completions-frame)
     (let ((w (frame-selected-window mini-frame-completions-frame)))
@@ -313,6 +334,7 @@ ALIST is passed to `window--display-buffer'."
             (mini-frame--make-frame (append '((minibuffer . only))
                                             parent-frame-parameters
                                             show-parameters))))
+    (mini-frame--move-frame-to-frame mini-frame-frame mini-frame-selected-frame)
     (modify-frame-parameters mini-frame-frame show-parameters)
     (when (and (frame-live-p mini-frame-completions-frame)
                (frame-visible-p mini-frame-completions-frame))
