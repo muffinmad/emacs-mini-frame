@@ -154,6 +154,11 @@ Option `resize-mini-frames' is available on Emacs 27 and later."
   :type '(choice (const :tag "Not set" nil)
                  (integer :tag "Lines count")))
 
+(defcustom mini-frame-resize-min-height nil
+  "Min height boundary for mini-frame when `mini-frame-resize' is set."
+  :type '(choice (const :tag "Not set" nil)
+                 (integer :tag "Lines count")))
+
 (defcustom mini-frame-create-lazy t
   "Create mini-frame lazily.
 If non-nil, mini-frame will be created on first use.
@@ -207,8 +212,10 @@ This function used as value for `resize-mini-frames' variable."
   (funcall mini-frame--fit-frame-function
            frame
            mini-frame-resize-max-height
-           (when (eq mini-frame-resize 'grow-only)
-             (frame-parameter frame 'height))
+           (if (eq mini-frame-resize 'grow-only)
+               (max (frame-parameter frame 'height)
+                    mini-frame-resize-min-height)
+             mini-frame-resize-min-height)
            nil nil 'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
