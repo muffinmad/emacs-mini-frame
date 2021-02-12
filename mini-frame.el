@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.15
+;; Package-Version: 1.16
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -347,6 +347,7 @@ ALIST is passed to `window--display-buffer'."
                (frame-visible-p mini-frame-completions-frame))
       (make-frame-invisible mini-frame-completions-frame))
     (make-frame-visible mini-frame-frame)
+    (redirect-frame-focus mini-frame-selected-frame mini-frame-frame)
     (select-frame-set-input-focus mini-frame-frame)
     (setq default-directory dd)
     (apply fn args)))
