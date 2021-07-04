@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.16
+;; Package-Version: 1.17
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -386,6 +386,7 @@ ALIST is passed to `window--display-buffer'."
    ((or mini-frame-ignore-this
         (not (display-graphic-p))
         (minibufferp)
+        isearch-mode
         (and (symbolp this-command)
              (catch 'ignored
                (dolist (ignored-command mini-frame-ignore-commands)
