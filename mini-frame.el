@@ -5,7 +5,7 @@
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.17
+;; Package-Version: 1.18
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -274,6 +274,7 @@ This function used as value for `resize-mini-frames' variable."
                                      (z-group . above))))))
     (set-face-background 'fringe nil frame)
     (when mini-frame-internal-border-color
+      (set-face-background 'child-frame-border mini-frame-internal-border-color frame)
       (set-face-background 'internal-border mini-frame-internal-border-color frame))
     frame))
 
