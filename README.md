@@ -10,7 +10,7 @@ While it's fine for me to have eldoc, flymake and other messages to appear at th
 
 ## How it looks like
 
-By default mini-frame is placed at the top of the current frame and occupied full width. Here is `execute-extended-command` (<kbd>M-x</kbd>) with `icomplete-mode` enabled:
+By default mini-frame is placed at the top of the current frame and occupies full width. Here is `execute-extended-command` (<kbd>M-x</kbd>) with `icomplete-mode` enabled:
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/icomplete-m-x.png" width="640">
@@ -38,7 +38,7 @@ And `execute-extended-command` (<kbd>M-x</kbd>) with `ivy-mode`:
   <img src="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/ivy-m-x.png" width="640">
 </p>
 
-`mini-frame-mode` also create separate child frame to display completions list:
+`mini-frame-mode` also creates a separate child frame to display completions list:
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/muffinmad/emacs-mini-frame/master/screenshots/completions-frame.png" width="640">
