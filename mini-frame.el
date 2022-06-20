@@ -216,7 +216,10 @@ This function used as value for `resize-mini-frames' variable."
                (max (frame-parameter frame 'height)
                     mini-frame-resize-min-height)
              mini-frame-resize-min-height)
-           nil nil 'vertically)
+           ;; Using the `only' parameter causes the fit to ignore the actual
+           ;; input area of the mini-window
+           (frame-parameter frame 'width)
+           (frame-parameter frame 'width))
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
