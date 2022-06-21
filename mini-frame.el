@@ -216,10 +216,12 @@ This function used as value for `resize-mini-frames' variable."
                (max (frame-parameter frame 'height)
                     mini-frame-resize-min-height)
              mini-frame-resize-min-height)
-           ;; Using the `only' parameter causes the fit to ignore the actual
-           ;; input area of the mini-window
+           ;; A max-width must be included to work around a bug in Emacs which
+           ;; causes wrapping to not be taken into account in some situations
+           ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=56102
            (frame-parameter frame 'width)
-           (frame-parameter frame 'width))
+           nil
+           'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
              (frame-visible-p mini-frame-completions-frame))
     (let ((show-parameters (if (functionp mini-frame-completions-show-parameters)
