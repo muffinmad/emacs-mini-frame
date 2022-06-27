@@ -219,7 +219,7 @@ This function used as value for `resize-mini-frames' variable."
            ;; A max-width must be included to work around a bug in Emacs which
            ;; causes wrapping to not be taken into account in some situations
            ;; https://debbugs.gnu.org/cgi/bugreport.cgi?bug=56102
-           (frame-parameter frame 'width)
+           (window-body-width)
            nil
            'vertically)
   (when (and (frame-live-p mini-frame-completions-frame)
