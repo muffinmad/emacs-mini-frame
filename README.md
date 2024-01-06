@@ -10,7 +10,7 @@ While it's fine for me to have eldoc, flymake and other messages to appear at th
 
 `mini-frame-mode` makes an advice around `read-from-minibuffer` function to create and show minibuffer-only child frame to accept input.
 
-## How it looks like
+## What it looks like
 
 By default mini-frame is placed at the top of the current frame and occupies full width. Here is `execute-extended-command` (<kbd>M-x</kbd>) with `icomplete-mode` enabled:
 
@@ -48,7 +48,7 @@ And `execute-extended-command` (<kbd>M-x</kbd>) with `ivy-mode`:
 
 ## Mini-frame size
 
-Users of Emacs 27 will benefits the most because of `resize-mini-frames` variable: mini-frame will be resized vertically to fit content.
+Users of Emacs 27 will benefit the most because of `resize-mini-frames` variable: mini-frame will be resized vertically to fit content.
 
 Users of Emacs 26 will need to configure frame height explicitly, e.g.:
 
