@@ -1,11 +1,11 @@
 ;;; mini-frame.el --- Show minibuffer in child frame on read-from-minibuffer -*- lexical-binding: t -*-
 
-;; Copyright (C) 2020-2021 Andrii Kolomoiets
+;; Copyright (C) 2020-2026 Andrii Kolomoiets
 
 ;; Author: Andrii Kolomoiets <andreyk.mad@gmail.com>
 ;; Keywords: frames
 ;; URL: https://github.com/muffinmad/emacs-mini-frame
-;; Package-Version: 1.19
+;; Package-Version: 1.20
 ;; Package-Requires: ((emacs "26.1"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -168,6 +168,10 @@ If nil, mini-frame will be created on the mode activation."
 (defcustom mini-frame-detach-on-hide t
   "Detach mini-frame from parent frame on mini-frame hide.
 This allow to avoid mini-frame recreation in case its parent frame were deleted."
+  :type 'boolean)
+
+(defcustom mini-frame-delete-on-hide nil
+  "Delete mini-frame in mini-frame hide."
   :type 'boolean)
 
 (defcustom mini-frame-standalone nil
@@ -446,8 +450,10 @@ ALIST is passed to `window--display-buffer'."
               (select-frame-set-input-focus mini-frame-selected-frame))
             (when (frame-live-p mini-frame-frame)
               (make-frame-invisible mini-frame-frame)
-              (when mini-frame-detach-on-hide
-                (modify-frame-parameters mini-frame-frame '((parent-frame . nil))))))))))))
+              (if mini-frame-delete-on-hide
+                  (delete-frame mini-frame-frame)
+                (when mini-frame-detach-on-hide
+                  (modify-frame-parameters mini-frame-frame '((parent-frame . nil)))))))))))))
 
 (defun mini-frame--advice (funcs func &optional remove)
   "Add advice FUNC around FUNCS.  If REMOVE, remove advice instead."
